@@ -68,7 +68,42 @@ export default function ReportAnalysis({ reportId, reportName, onFieldOperation 
       const response = await apiService.getReportMetadata(reportId);
       
       if (response.success && response.data) {
-        setMetadata(response.data);
+        // Transform backend data to frontend format
+        const backendData = response.data;
+        const transformedMetadata = {
+          id: backendData.id,
+          name: backendData.title || backendData.filename || reportName,
+          size: backendData.file_size || 0,
+          upload_date: backendData.parsed_at || new Date().toISOString(),
+          status: backendData.status || 'ready',
+          // Transform sections to flat fields array for frontend
+          fields: backendData.sections?.flatMap(section => 
+            section.fields?.map(field => ({
+              id: field.id,
+              name: field.name,
+              type: field.field_type || field.type || 'string',
+              section: section.name || section.section_type || 'Details',
+              visible: true,
+              position: {
+                x: field.x || 0,
+                y: field.y || 0,
+                width: field.width || 100,
+                height: field.height || 20
+              },
+              formula: field.formula
+            })) || []
+          ) || [],
+          // Transform tables
+          tables: backendData.tables || [],
+          // Transform parameters
+          parameters: backendData.parameters?.map(param => ({
+            name: param.name,
+            type: param.field_type || param.type || 'string',
+            default_value: param.default_value,
+            required: param.required || false
+          })) || []
+        };
+        setMetadata(transformedMetadata);
       } else {
         // Fallback to demo data if API fails
         setMetadata({

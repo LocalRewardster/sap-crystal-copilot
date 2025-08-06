@@ -136,13 +136,13 @@ class ApiService {
 
   // Chat endpoint for general AI assistance
   async chatWithAI(
-    messages: ChatMessage[],
+    message: string,
     reportId?: string
   ): Promise<ApiResponse<{ response: string; sources?: string[] }>> {
     return this.request('/chat', {
       method: 'POST',
       body: JSON.stringify({
-        messages,
+        messages: [{ role: 'user', content: message }],
         report_id: reportId,
       }),
     });
