@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Platform>x86</Platform>
+    <PlatformTarget>x86</PlatformTarget>
+    <LangVersion>10.0</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.2.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <!-- Copy Crystal Reports DLLs to output directory -->
+  <ItemGroup>
+    <None Include="C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\CrystalDecisions.CrystalReports.Engine.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\CrystalDecisions.Shared.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- Reference Crystal Reports DLLs -->
+  <ItemGroup>
+    <Reference Include="CrystalDecisions.CrystalReports.Engine">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\CrystalDecisions.CrystalReports.Engine.dll</HintPath>
+      <Private>true</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+    <Reference Include="CrystalDecisions.Shared">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\CrystalDecisions.Shared.dll</HintPath>
+      <Private>true</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
+  </ItemGroup>
+
+</Project>

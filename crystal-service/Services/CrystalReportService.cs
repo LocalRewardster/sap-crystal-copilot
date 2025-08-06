@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using CrystalDecisions.CrystalReports.Engine;
 using CrystalDecisions.Shared;
 using CrystalReportsService.Models;
