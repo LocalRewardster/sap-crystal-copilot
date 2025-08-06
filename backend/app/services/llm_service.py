@@ -437,7 +437,7 @@ Provide clear, helpful responses that are specific to Crystal Reports. If you do
             
             # Prepare request payload
             payload = {
-                "model": self.primary_model,
+                "model": self.models["primary"],
                 "messages": messages,
                 "temperature": 0.3,  # Slightly higher for more conversational responses
                 "max_tokens": 800,
@@ -473,7 +473,7 @@ Provide clear, helpful responses that are specific to Crystal Reports. If you do
                     
                     logger.info(
                         "General chat completed successfully",
-                        model=self.primary_model,
+                        model=self.models["primary"],
                         duration_ms=duration_ms,
                         response_length=len(ai_response)
                     )
