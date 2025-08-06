@@ -151,9 +151,9 @@ export default function HomePage() {
         };
         setChatHistory(prev => [...prev, reportContextMessage]);
         
-        // Switch to reports view to show the uploaded report
+        // Switch to analysis view to show the uploaded report
         setTimeout(() => {
-          setActiveView('reports');
+          setActiveView('analysis');
           setShowUpload(false);
         }, 2000);
       } else {
@@ -178,9 +178,9 @@ export default function HomePage() {
       setIsUploading(false);
       setUploadComplete(true);
       
-      // Switch to reports view to show the "uploaded" report
+      // Switch to analysis view to show the "uploaded" report
       setTimeout(() => {
-        setActiveView('reports');
+        setActiveView('analysis');
         setShowUpload(false);
       }, 2000);
     }
@@ -399,14 +399,46 @@ export default function HomePage() {
                         }`}>
                           {report.status}
                         </span>
-                        <button className="px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
-                          Open
+                        <button 
+                          onClick={() => {
+                            setCurrentReportId(report.id);
+                            setActiveView('analysis');
+                          }}
+                          className="px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                        >
+                          Analyze
                         </button>
                       </div>
                     </div>
                   ))}
                 </div>
               </>
+            )}
+
+            {/* Report Analysis View */}
+            {activeView === 'analysis' && currentReportId && (
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-2xl font-semibold text-gray-900 mb-2">Report Analysis</h2>
+                    <p className="text-gray-600">
+                      Analyzing: {sampleReports.find(r => r.id === currentReportId)?.name || 'Unknown Report'}
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => setActiveView('reports')}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                  >
+                    Back to Reports
+                  </button>
+                </div>
+
+                <ReportAnalysis
+                  reportId={currentReportId}
+                  reportName={sampleReports.find(r => r.id === currentReportId)?.name || 'Unknown Report'}
+                  onFieldOperation={handleFieldOperation}
+                />
+              </div>
             )}
           </div>
         </div>
