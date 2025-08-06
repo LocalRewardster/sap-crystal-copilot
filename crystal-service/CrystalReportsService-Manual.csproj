@@ -1,0 +1,75 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Platform>x86</Platform>
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.2.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <!-- Crystal Reports DLL References - Multiple path attempts -->
+  <ItemGroup>
+    <!-- Try Assemblies folder first (most common) -->
+    <Reference Include="CrystalDecisions.CrystalReports.Engine" Condition="Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Assemblies\CrystalDecisions.CrystalReports.Engine.dll')">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Assemblies\CrystalDecisions.CrystalReports.Engine.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="CrystalDecisions.Shared" Condition="Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Assemblies\CrystalDecisions.Shared.dll')">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Assemblies\CrystalDecisions.Shared.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="CrystalDecisions.ReportSource" Condition="Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Assemblies\CrystalDecisions.ReportSource.dll')">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Assemblies\CrystalDecisions.ReportSource.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="CrystalDecisions.Web" Condition="Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Assemblies\CrystalDecisions.Web.dll')">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Assemblies\CrystalDecisions.Web.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+
+    <!-- Try RedistDotNet40 folder -->
+    <Reference Include="CrystalDecisions.CrystalReports.Engine" Condition="!Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Assemblies\CrystalDecisions.CrystalReports.Engine.dll') AND Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\RedistDotNet40\CrystalDecisions.CrystalReports.Engine.dll')">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\RedistDotNet40\CrystalDecisions.CrystalReports.Engine.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="CrystalDecisions.Shared" Condition="!Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Assemblies\CrystalDecisions.Shared.dll') AND Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\RedistDotNet40\CrystalDecisions.Shared.dll')">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\RedistDotNet40\CrystalDecisions.Shared.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="CrystalDecisions.ReportSource" Condition="!Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Assemblies\CrystalDecisions.ReportSource.dll') AND Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\RedistDotNet40\CrystalDecisions.ReportSource.dll')">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\RedistDotNet40\CrystalDecisions.ReportSource.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="CrystalDecisions.Web" Condition="!Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Assemblies\CrystalDecisions.Web.dll') AND Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\RedistDotNet40\CrystalDecisions.Web.dll')">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\RedistDotNet40\CrystalDecisions.Web.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+
+    <!-- Try win32_x86 folder -->
+    <Reference Include="CrystalDecisions.CrystalReports.Engine" Condition="!Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Assemblies\CrystalDecisions.CrystalReports.Engine.dll') AND !Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\RedistDotNet40\CrystalDecisions.CrystalReports.Engine.dll') AND Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Common\SAP BusinessObjects Enterprise XI 4.0\win32_x86\CrystalDecisions.CrystalReports.Engine.dll')">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Common\SAP BusinessObjects Enterprise XI 4.0\win32_x86\CrystalDecisions.CrystalReports.Engine.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="CrystalDecisions.Shared" Condition="!Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Assemblies\CrystalDecisions.Shared.dll') AND !Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\RedistDotNet40\CrystalDecisions.Shared.dll') AND Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Common\SAP BusinessObjects Enterprise XI 4.0\win32_x86\CrystalDecisions.Shared.dll')">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Common\SAP BusinessObjects Enterprise XI 4.0\win32_x86\CrystalDecisions.Shared.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="CrystalDecisions.ReportSource" Condition="!Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Assemblies\CrystalDecisions.ReportSource.dll') AND !Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\RedistDotNet40\CrystalDecisions.ReportSource.dll') AND Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Common\SAP BusinessObjects Enterprise XI 4.0\win32_x86\CrystalDecisions.ReportSource.dll')">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Common\SAP BusinessObjects Enterprise XI 4.0\win32_x86\CrystalDecisions.ReportSource.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="CrystalDecisions.Web" Condition="!Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Assemblies\CrystalDecisions.Web.dll') AND !Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\RedistDotNet40\CrystalDecisions.Web.dll') AND Exists('C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Common\SAP BusinessObjects Enterprise XI 4.0\win32_x86\CrystalDecisions.Web.dll')">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Common\SAP BusinessObjects Enterprise XI 4.0\win32_x86\CrystalDecisions.Web.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>
