@@ -94,10 +94,10 @@ export default function CrystalLayout({ children, activeView = 'reports', onView
 
   return (
     <div className="h-screen flex flex-col bg-slate-50">
-      {/* Professional SAP-Style Header */}
-      <div className="bg-white border-b border-slate-200 shadow-lg">
-        {/* Main Header */}
-        <div className="flex items-center justify-between px-8 py-4 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900">
+              {/* 🔥 TESTING: This should be a DARK PROFESSIONAL HEADER! */}
+        <div className="bg-white border-b border-slate-200 shadow-lg">
+          {/* Main Header */}
+          <div className="flex items-center justify-between px-8 py-4 bg-gradient-to-r from-red-900 via-purple-800 to-blue-900">
           <div className="flex items-center space-x-6">
             {/* SAP-Style Logo and Branding */}
             <div className="flex items-center space-x-4">
