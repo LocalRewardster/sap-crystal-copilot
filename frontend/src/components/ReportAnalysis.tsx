@@ -208,11 +208,11 @@ export default function ReportAnalysis({ reportId, reportName, onFieldOperation 
           <div>
             <h3 className="text-lg font-medium text-gray-900 flex items-center">
               <FileText className="h-5 w-5 mr-2 text-blue-600" />
-              {metadata.name}
+              {metadata?.name || reportName}
             </h3>
-            <p className="text-sm text-gray-500 mt-1">
-              {metadata.fields.length} fields • {metadata.tables.length} tables • {metadata.parameters.length} parameters
-            </p>
+                      <p className="text-sm text-gray-500 mt-1">
+            {metadata?.fields?.length || 0} fields • {metadata?.tables?.length || 0} tables • {metadata?.parameters?.length || 0} parameters
+          </p>
           </div>
           <div className="flex items-center space-x-2">
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -231,9 +231,9 @@ export default function ReportAnalysis({ reportId, reportName, onFieldOperation 
         <nav className="-mb-px flex space-x-8 px-6">
           {[
             { id: 'preview', label: 'Preview', count: null },
-            { id: 'fields', label: 'Fields', count: metadata.fields.length },
-            { id: 'tables', label: 'Tables', count: metadata.tables.length },
-            { id: 'parameters', label: 'Parameters', count: metadata.parameters.length },
+            { id: 'fields', label: 'Fields', count: metadata?.fields?.length || 0 },
+            { id: 'tables', label: 'Tables', count: metadata?.tables?.length || 0 },
+            { id: 'parameters', label: 'Parameters', count: metadata?.parameters?.length || 0 },
             { id: 'audit', label: 'History', count: null }
           ].map(tab => (
             <button
@@ -257,7 +257,7 @@ export default function ReportAnalysis({ reportId, reportName, onFieldOperation 
           <ReportPreview
             reportId={reportId}
             reportName={reportName}
-            fields={metadata.fields}
+            fields={metadata?.fields || []}
             onFieldSelect={setSelectedField}
             onFieldOperation={onFieldOperation}
             selectedFieldId={selectedField}
@@ -266,7 +266,7 @@ export default function ReportAnalysis({ reportId, reportName, onFieldOperation 
 
         {activeTab === 'fields' && (
           <div className="space-y-3">
-            {metadata.fields.map(field => (
+            {(metadata?.fields || []).map(field => (
               <div
                 key={field.id}
                 className={`border rounded-lg p-4 transition-all ${
@@ -341,7 +341,7 @@ export default function ReportAnalysis({ reportId, reportName, onFieldOperation 
 
         {activeTab === 'tables' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {metadata.tables.map(table => (
+            {(metadata?.tables || []).map(table => (
               <div key={table} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center">
                   <Database className="h-5 w-5 text-blue-600 mr-3" />
@@ -355,7 +355,7 @@ export default function ReportAnalysis({ reportId, reportName, onFieldOperation 
 
         {activeTab === 'parameters' && (
           <div className="space-y-3">
-            {metadata.parameters.map((param, index) => (
+            {(metadata?.parameters || []).map((param, index) => (
               <div key={index} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div>
