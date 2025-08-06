@@ -12,8 +12,11 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  Zap
+  Zap,
+  Layout
 } from 'lucide-react';
+import ReportPreview from './ReportPreview';
+import AuditTrail from './AuditTrail';
 import { apiService } from '@/services/api';
 
 interface ReportField {
@@ -53,7 +56,7 @@ export default function ReportAnalysis({ reportId, reportName, onFieldOperation 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedField, setSelectedField] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'fields' | 'tables' | 'parameters'>('fields');
+  const [activeTab, setActiveTab] = useState<'fields' | 'tables' | 'parameters' | 'preview' | 'audit'>('preview');
 
   useEffect(() => {
     loadReportMetadata();
@@ -227,9 +230,11 @@ export default function ReportAnalysis({ reportId, reportName, onFieldOperation 
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8 px-6">
           {[
+            { id: 'preview', label: 'Preview', count: null },
             { id: 'fields', label: 'Fields', count: metadata.fields.length },
             { id: 'tables', label: 'Tables', count: metadata.tables.length },
-            { id: 'parameters', label: 'Parameters', count: metadata.parameters.length }
+            { id: 'parameters', label: 'Parameters', count: metadata.parameters.length },
+            { id: 'audit', label: 'History', count: null }
           ].map(tab => (
             <button
               key={tab.id}
@@ -240,14 +245,25 @@ export default function ReportAnalysis({ reportId, reportName, onFieldOperation 
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              {tab.label} ({tab.count})
+              {tab.label}{tab.count !== null ? ` (${tab.count})` : ''}
             </button>
           ))}
         </nav>
       </div>
 
       {/* Content */}
-      <div className="p-6">
+      <div className={activeTab === 'preview' || activeTab === 'audit' ? 'h-96' : 'p-6'}>
+        {activeTab === 'preview' && (
+          <ReportPreview
+            reportId={reportId}
+            reportName={reportName}
+            fields={metadata.fields}
+            onFieldSelect={setSelectedField}
+            onFieldOperation={onFieldOperation}
+            selectedFieldId={selectedField}
+          />
+        )}
+
         {activeTab === 'fields' && (
           <div className="space-y-3">
             {metadata.fields.map(field => (
@@ -357,6 +373,13 @@ export default function ReportAnalysis({ reportId, reportName, onFieldOperation 
               </div>
             ))}
           </div>
+        )}
+
+        {activeTab === 'audit' && (
+          <AuditTrail
+            reportId={reportId}
+            reportName={reportName}
+          />
         )}
       </div>
     </div>
