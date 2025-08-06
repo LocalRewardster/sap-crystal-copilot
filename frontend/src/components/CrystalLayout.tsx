@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   FileText, 
   Folder, 
@@ -27,6 +27,16 @@ interface CrystalLayoutProps {
 
 export default function CrystalLayout({ children, activeView = 'reports', onViewChange }: CrystalLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [currentTime, setCurrentTime] = useState<string>('');
+  
+  // Update time on client side only to avoid hydration mismatch
+  useEffect(() => {
+    setCurrentTime(new Date().toLocaleTimeString());
+    const interval = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
   
   const handleViewChange = (view: string) => {
     if (onViewChange) {
@@ -330,7 +340,7 @@ export default function CrystalLayout({ children, activeView = 'reports', onView
                   <span className="text-sm font-semibold">System Ready</span>
                 </div>
                 <div className="text-sm text-slate-500">
-                  Last updated: {new Date().toLocaleTimeString()}
+                  Last updated: {currentTime || '--:--:--'}
                 </div>
               </div>
             </div>
