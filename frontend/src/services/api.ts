@@ -217,6 +217,79 @@ class ApiService {
     return null;
   }
 
+  // Crystal Reports SDK operations
+  async generateCrystalPreview(
+    reportId: string, 
+    format: string = 'PDF', 
+    parameters?: Record<string, any>
+  ): Promise<Blob | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/crystal/${reportId}/preview`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          format,
+          parameters: parameters || {}
+        }),
+      });
+
+      if (response.ok) {
+        return await response.blob();
+      }
+    } catch (error) {
+      console.error('Failed to generate Crystal preview:', error);
+    }
+    return null;
+  }
+
+  async performCrystalFieldOperation(
+    reportId: string,
+    fieldName: string,
+    operation: string,
+    parameters?: Record<string, any>
+  ): Promise<ApiResponse<boolean>> {
+    return this.request(`/crystal/${reportId}/field-operation`, {
+      method: 'POST',
+      body: JSON.stringify({
+        field_name: fieldName,
+        operation,
+        parameters: parameters || {}
+      }),
+    });
+  }
+
+  async exportCrystalReport(
+    reportId: string,
+    format: string,
+    parameters?: Record<string, any>
+  ): Promise<Blob | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/crystal/${reportId}/export`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          format,
+          parameters: parameters || {}
+        }),
+      });
+
+      if (response.ok) {
+        return await response.blob();
+      }
+    } catch (error) {
+      console.error('Failed to export Crystal report:', error);
+    }
+    return null;
+  }
+
+  async checkCrystalServiceHealth(): Promise<ApiResponse<{ available: boolean; status: string }>> {
+    return this.request('/crystal/health');
+  }
+
   // Health check
   async healthCheck(): Promise<ApiResponse<{ status: string; version: string }>> {
     return this.request('/health');

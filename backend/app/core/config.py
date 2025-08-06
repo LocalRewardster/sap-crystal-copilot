@@ -52,6 +52,7 @@ class Settings(BaseSettings):
     # Crystal Reports Processing
     RPTTOXML_PATH: str = Field(env="RPTTOXML_PATH", default="./bin/RptToXml.exe")
     CRYSTAL_SDK_PATH: str = Field(env="CRYSTAL_SDK_PATH", default="C:/Program Files/SAP BusinessObjects/Crystal Reports for .NET Framework 4.0/Common/SAP BusinessObjects Enterprise XI 4.0/win64_x64/")
+    CRYSTAL_SERVICE_URL: str = Field(env="CRYSTAL_SERVICE_URL", default="http://localhost:5001")
     
     # Security
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=30, env="ACCESS_TOKEN_EXPIRE_MINUTES")

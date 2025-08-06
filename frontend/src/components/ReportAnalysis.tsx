@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import ReportPreview from './ReportPreview';
 import AuditTrail from './AuditTrail';
+import CrystalReportViewer from './CrystalReportViewer';
 import { apiService } from '@/services/api';
 
 interface ReportField {
@@ -56,7 +57,7 @@ export default function ReportAnalysis({ reportId, reportName, onFieldOperation 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedField, setSelectedField] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'fields' | 'tables' | 'parameters' | 'preview' | 'audit'>('preview');
+  const [activeTab, setActiveTab] = useState<'fields' | 'tables' | 'parameters' | 'preview' | 'crystal' | 'audit'>('crystal');
 
   useEffect(() => {
     loadReportMetadata();
@@ -265,7 +266,8 @@ export default function ReportAnalysis({ reportId, reportName, onFieldOperation 
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8 px-6">
           {[
-            { id: 'preview', label: 'Preview', count: null },
+            { id: 'crystal', label: 'Crystal SDK', count: null },
+            { id: 'preview', label: 'Web Preview', count: null },
             { id: 'fields', label: 'Fields', count: metadata?.fields?.length || 0 },
             { id: 'tables', label: 'Tables', count: metadata?.tables?.length || 0 },
             { id: 'parameters', label: 'Parameters', count: metadata?.parameters?.length || 0 },
@@ -287,7 +289,16 @@ export default function ReportAnalysis({ reportId, reportName, onFieldOperation 
       </div>
 
       {/* Content */}
-      <div className={activeTab === 'preview' || activeTab === 'audit' ? 'h-96' : 'p-6'}>
+      <div className={activeTab === 'preview' || activeTab === 'crystal' || activeTab === 'audit' ? 'h-96' : 'p-6'}>
+        {activeTab === 'crystal' && (
+          <CrystalReportViewer
+            reportId={reportId}
+            reportName={reportName}
+            format="PDF"
+            onError={(error) => setError(error)}
+          />
+        )}
+
         {activeTab === 'preview' && (
           <ReportPreview
             reportId={reportId}

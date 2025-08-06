@@ -20,6 +20,7 @@ from app.models.report import (
     ReportMetadata, ReportField, ReportSection, DatabaseField, DatabaseConnection,
     FieldType, SectionType, ReportStatus
 )
+from app.services.crystal_bridge import get_crystal_bridge_service
 
 logger = get_logger(__name__)
 settings = get_settings()
@@ -30,6 +31,7 @@ class ReportParserService:
     
     def __init__(self):
         self.rpttoxml_path = Path(settings.RPTTOXML_PATH)
+        self.crystal_bridge = get_crystal_bridge_service()
         
     async def parse_report(self, file_path: Path, report_id: str, filename: str) -> ReportMetadata:
         """
@@ -47,6 +49,22 @@ class ReportParserService:
         
         try:
             logger.info("Starting report parsing", report_id=report_id, filename=filename)
+            
+            # Try Crystal Bridge first (if C# service is available)
+            if await self.crystal_bridge.health_check():
+                logger.info("Using Crystal Reports SDK via C# service", report_id=report_id)
+                try:
+                    metadata = await self.crystal_bridge.extract_metadata(file_path)
+                    # Update metadata with our IDs
+                    metadata.id = report_id
+                    metadata.filename = filename
+                    return metadata
+                except Exception as e:
+                    logger.warning("Crystal Bridge failed, falling back to RptToXml", 
+                                 report_id=report_id, error=str(e))
+            
+            # Fallback to RptToXml method
+            logger.info("Using RptToXml fallback method", report_id=report_id)
             
             # Step 1: Convert .rpt to XML using RptToXml
             xml_content = await self._convert_rpt_to_xml(file_path)
