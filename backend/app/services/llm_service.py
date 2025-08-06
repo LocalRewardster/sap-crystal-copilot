@@ -391,3 +391,100 @@ REPORT CONTEXT:
                 tokens_used=0,
                 processing_time_ms=duration_ms
             )
+    
+    async def general_chat(
+        self, 
+        message: str, 
+        conversation_history: List[Dict[str, str]] = None
+    ) -> str:
+        """
+        General chat assistance for Crystal Reports without specific report context.
+        
+        Args:
+            message: User's message
+            conversation_history: Previous conversation messages
+            
+        Returns:
+            AI response as string
+        """
+        start_time = time.time()
+        
+        try:
+            # Prepare conversation context
+            messages = []
+            
+            # Add system prompt for general Crystal Reports assistance
+            system_prompt = """You are a helpful AI assistant specializing in Crystal Reports and SAP BusinessObjects. 
+
+You can help users with:
+- General Crystal Reports concepts and best practices
+- Report design and layout guidance
+- Troubleshooting common Crystal Reports issues
+- Data source connections and field mapping
+- Formula and parameter usage
+- Report optimization and performance tips
+
+Provide clear, helpful responses that are specific to Crystal Reports. If you don't know something specific, acknowledge it and provide general guidance."""
+
+            messages.append({"role": "system", "content": system_prompt})
+            
+            # Add conversation history
+            if conversation_history:
+                messages.extend(conversation_history[-5:])  # Keep last 5 messages for context
+            
+            # Add current user message
+            messages.append({"role": "user", "content": message})
+            
+            # Prepare request payload
+            payload = {
+                "model": self.primary_model,
+                "messages": messages,
+                "temperature": 0.3,  # Slightly higher for more conversational responses
+                "max_tokens": 800,
+            }
+            
+            # Make API request
+            headers = {
+                "Authorization": f"Bearer {self.openrouter_api_key}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://crystal-copilot.sap.com",
+                "X-Title": "SAP Crystal Copilot"
+            }
+            
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    f"{self.base_url}/chat/completions",
+                    headers=headers,
+                    json=payload
+                )
+                
+                if response.status_code != 200:
+                    error_detail = response.text
+                    logger.error("LLM API error", status_code=response.status_code, error=error_detail)
+                    raise RuntimeError(f"LLM API error ({response.status_code}): {error_detail}")
+                
+                result = response.json()
+                
+                # Extract response
+                if 'choices' in result and len(result['choices']) > 0:
+                    ai_response = result['choices'][0]['message']['content']
+                    
+                    duration_ms = (time.time() - start_time) * 1000
+                    
+                    logger.info(
+                        "General chat completed successfully",
+                        model=self.primary_model,
+                        duration_ms=duration_ms,
+                        response_length=len(ai_response)
+                    )
+                    
+                    return ai_response
+                else:
+                    raise ValueError("No response content received from LLM")
+                    
+        except Exception as e:
+            duration_ms = (time.time() - start_time) * 1000
+            logger.error("General chat failed", error=str(e), duration_ms=duration_ms)
+            
+            # Return fallback response
+            return f"I apologize, but I'm experiencing technical difficulties right now. However, I'm here to help with Crystal Reports questions! You can ask me about report design, data sources, formulas, parameters, or any other Crystal Reports topics. (Error: {str(e)})"
