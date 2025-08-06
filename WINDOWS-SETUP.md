@@ -154,6 +154,12 @@ Open http://localhost:3000 in your browser
 
 ## 🛠️ Troubleshooting
 
+### Quick Fix Script
+If you encounter errors, run the fix script:
+```cmd
+scripts\fix-windows-errors.bat
+```
+
 ### Common Issues
 
 #### Python Not Found

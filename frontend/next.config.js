@@ -25,10 +25,10 @@ const nextConfig = {
     domains: ['localhost'],
   },
   
-  // Experimental features
-  experimental: {
-    appDir: true,
-  },
+  // App directory is now stable in Next.js 14
+  // experimental: {
+  //   appDir: true,
+  // },
 };
 
 module.exports = nextConfig;
