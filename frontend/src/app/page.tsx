@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import ActionCard from '@/components/ActionCard';
+import { apiService, type ChatMessage } from '@/services/api';
 import { 
   FileText, 
   Upload, 
@@ -34,17 +35,62 @@ export default function HomePage() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadComplete, setUploadComplete] = useState(false);
-  const [chatHistory, setChatHistory] = useState([
-    { type: 'assistant', message: 'Hello! I\'m your Crystal Reports AI assistant. How can I help you today?' }
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([
+    { 
+      role: 'assistant', 
+      content: 'Hello! I\'m your Crystal Reports AI assistant. How can I help you today?',
+      timestamp: new Date().toISOString()
+    }
   ]);
+  const [isLoadingChat, setIsLoadingChat] = useState(false);
 
-  const handleSendMessage = () => {
-    if (chatMessage.trim()) {
-      setChatHistory([...chatHistory, 
-        { type: 'user', message: chatMessage },
-        { type: 'assistant', message: `I can help you with "${chatMessage}". This would connect to our AI service to provide detailed assistance with Crystal Reports analysis, field mapping, and report optimization.` }
-      ]);
+  const handleSendMessage = async () => {
+    if (chatMessage.trim() && !isLoadingChat) {
+      const userMessage: ChatMessage = {
+        role: 'user',
+        content: chatMessage.trim(),
+        timestamp: new Date().toISOString()
+      };
+
+      // Add user message immediately
+      setChatHistory(prev => [...prev, userMessage]);
       setChatMessage('');
+      setIsLoadingChat(true);
+
+      try {
+        // Get the current report ID if we have an uploaded file
+        const reportId = uploadComplete && selectedFile ? 'demo-report-id' : undefined;
+        
+        // Send to API
+        const response = await apiService.chatWithAI([...chatHistory, userMessage], reportId);
+        
+        if (response.success && response.data) {
+          const assistantMessage: ChatMessage = {
+            role: 'assistant',
+            content: response.data.response,
+            timestamp: new Date().toISOString()
+          };
+          setChatHistory(prev => [...prev, assistantMessage]);
+        } else {
+          // Fallback to demo response if API fails
+          const fallbackMessage: ChatMessage = {
+            role: 'assistant',
+            content: `I understand you're asking about: "${userMessage.content}". I'm currently in demo mode. In the full version, I would analyze your Crystal Reports and provide detailed insights about your data, fields, and report structure. ${response.error ? `(API Error: ${response.error})` : ''}`,
+            timestamp: new Date().toISOString()
+          };
+          setChatHistory(prev => [...prev, fallbackMessage]);
+        }
+      } catch (error) {
+        console.error('Chat error:', error);
+        const errorMessage: ChatMessage = {
+          role: 'assistant',
+          content: `Sorry, I encountered an error while processing your request. This appears to be a connection issue with the backend service. Please ensure the backend is running on http://localhost:8000.`,
+          timestamp: new Date().toISOString()
+        };
+        setChatHistory(prev => [...prev, errorMessage]);
+      } finally {
+        setIsLoadingChat(false);
+      }
     }
   };
 
@@ -73,24 +119,49 @@ export default function HomePage() {
     setUploadProgress(0);
     setUploadComplete(false);
 
-    // Simulate upload progress
-    for (let progress = 0; progress <= 100; progress += 10) {
-      setUploadProgress(progress);
-      await new Promise(resolve => setTimeout(resolve, 200));
-    }
+    try {
+      // Try real API upload first
+      const response = await apiService.uploadReport(selectedFile);
+      
+      if (response.success) {
+        // Real upload successful
+        setUploadProgress(100);
+        setIsUploading(false);
+        setUploadComplete(true);
+        
+        // Switch to reports view to show the uploaded report
+        setTimeout(() => {
+          setActiveView('reports');
+          setShowUpload(false);
+        }, 2000);
+      } else {
+        throw new Error(response.error || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      
+      // Fallback to simulation if API fails
+      console.log('Falling back to upload simulation');
+      
+      // Simulate upload progress
+      for (let progress = 0; progress <= 100; progress += 10) {
+        setUploadProgress(progress);
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
 
-    // Simulate processing
-    setUploadProgress(100);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setIsUploading(false);
-    setUploadComplete(true);
-    
-    // Switch to reports view to show the "uploaded" report
-    setTimeout(() => {
-      setActiveView('reports');
-      setShowUpload(false);
-    }, 2000);
+      // Simulate processing
+      setUploadProgress(100);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setIsUploading(false);
+      setUploadComplete(true);
+      
+      // Switch to reports view to show the "uploaded" report
+      setTimeout(() => {
+        setActiveView('reports');
+        setShowUpload(false);
+      }, 2000);
+    }
   };
 
   const sampleReports = [
@@ -443,16 +514,26 @@ export default function HomePage() {
             
             <div className="flex-1 p-4 overflow-y-auto">
               {chatHistory.map((msg, index) => (
-                <div key={index} className={`mb-4 ${msg.type === 'user' ? 'text-right' : 'text-left'}`}>
+                <div key={index} className={`mb-4 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
                   <div className={`inline-block p-3 rounded-lg max-w-sm text-sm ${
-                    msg.type === 'user' 
+                    msg.role === 'user' 
                       ? 'bg-blue-600 text-white' 
                       : 'bg-gray-100 text-gray-900'
                   }`}>
-                    {msg.message}
+                    {msg.content}
                   </div>
                 </div>
               ))}
+              {isLoadingChat && (
+                <div className="text-left mb-4">
+                  <div className="inline-block p-3 rounded-lg max-w-sm text-sm bg-gray-100 text-gray-900">
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      <span>AI is thinking...</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             
             <div className="p-4 border-t border-gray-200">
@@ -467,9 +548,14 @@ export default function HomePage() {
                 />
                 <button 
                   onClick={handleSendMessage}
-                  className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                  disabled={isLoadingChat || !chatMessage.trim()}
+                  className={`px-4 py-2 text-sm font-medium rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${
+                    isLoadingChat || !chatMessage.trim()
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
                 >
-                  Send
+                  {isLoadingChat ? 'Sending...' : 'Send'}
                 </button>
               </div>
             </div>

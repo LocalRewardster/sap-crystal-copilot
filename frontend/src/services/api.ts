@@ -1,380 +1,228 @@
-import axios from 'axios';
+/**
+ * API service for Crystal Copilot frontend
+ * Handles all communication with the FastAPI backend
+ */
 
-// API Configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-const api = axios.create({
-  baseURL: `${API_BASE_URL}/api/v1`,
-  timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Request interceptor for logging
-api.interceptors.request.use(
-  (config) => {
-    console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`);
-    return config;
-  },
-  (error) => {
-    console.error('API Request Error:', error);
-    return Promise.reject(error);
-  }
-);
-
-// Response interceptor for error handling
-api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    console.error('API Response Error:', error.response?.data || error.message);
-    
-    // Handle specific error cases
-    if (error.response?.status === 401) {
-      // Handle unauthorized access
-      console.warn('Unauthorized access - consider implementing authentication');
-    } else if (error.response?.status >= 500) {
-      // Handle server errors
-      console.error('Server error occurred');
-    }
-    
-    return Promise.reject(error);
-  }
-);
-
-// Type definitions
-export interface UploadResponse {
-  report_id: string;
-  filename: string;
-  file_size: number;
-  status: 'uploading' | 'parsing' | 'ready' | 'error';
-  message: string;
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
 }
 
-export interface ReportInfo {
-  report_id: string;
-  filename: string;
-  file_size: number;
+export interface ReportMetadata {
+  id: string;
+  name: string;
+  size: number;
+  upload_date: string;
   status: string;
-  error_message?: string;
-  created_at: string;
-  updated_at: string;
+  fields: ReportField[];
+  tables: string[];
+  parameters: ReportParameter[];
 }
 
 export interface ReportField {
   id: string;
   name: string;
-  display_name?: string;
-  field_type: string;
+  type: string;
   section: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  visible: boolean;
-  formula?: string;
-  database_field?: {
-    table_name: string;
-    field_name: string;
-    data_type: string;
-  };
-}
-
-export interface ReportSection {
-  id: string;
-  section_type: string;
-  name: string;
-  height: number;
-  visible: boolean;
-  fields: ReportField[];
-}
-
-export interface ReportMetadata {
-  id: string;
-  filename: string;
-  title?: string;
-  description?: string;
-  author?: string;
-  created_date?: string;
-  modified_date?: string;
-  sections: ReportSection[];
-  parameters: ReportField[];
-  formulas: ReportField[];
-  database_connections: Array<{
-    driver: string;
-    server?: string;
-    database?: string;
-    username?: string;
-  }>;
-  tables: string[];
-  status: string;
-  file_size: number;
-  parsed_at?: string;
-}
-
-export interface QueryRequest {
-  query: string;
-  context?: Record<string, any>;
-}
-
-export interface QueryResponse {
-  query: string;
-  answer: string;
-  field_references: Array<{
-    field_id?: string;
-    field_name?: string;
-    section?: string;
-    database_source?: string;
-    relevance?: string;
-  }>;
-  confidence: number;
-  sources: string[];
-  model_used: string;
-  tokens_used: number;
-  processing_time_ms: number;
-}
-
-export interface EditPatch {
-  id?: string;
-  operation: 'hide' | 'show' | 'move' | 'rename' | 'resize' | 'format' | 'delete';
-  target_field_id: string;
-  target_section_id?: string;
-  new_name?: string;
-  new_position?: {
+  position: {
     x: number;
     y: number;
     width: number;
     height: number;
   };
-  new_format?: Record<string, any>;
-  visible?: boolean;
-  description?: string;
+  visible: boolean;
+  formula?: string;
 }
 
-export interface EditPreviewResponse {
-  patches: EditPatch[];
-  affected_fields: ReportField[];
-  html_diff: string;
-  warnings: string[];
-  estimated_impact: string;
+export interface ReportParameter {
+  name: string;
+  type: string;
+  default_value?: any;
+  required: boolean;
 }
 
-export interface ApplyEditsRequest {
-  patches: EditPatch[];
-  dry_run?: boolean;
-  create_backup?: boolean;
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
 }
 
-export interface ApplyEditsResponse {
-  success: boolean;
-  applied_patches: string[];
-  failed_patches: Array<{
-    patch_id: string;
-    error: string;
-  }>;
-  backup_path?: string;
-  change_log_entries: any[];
+export interface QueryResponse {
+  response: string;
+  confidence: number;
+  sources: string[];
+  related_fields?: string[];
 }
 
-// API Functions
+class ApiService {
+  private baseUrl: string;
 
-// Upload
-export const uploadReport = async (file: File): Promise<UploadResponse> => {
-  const formData = new FormData();
-  formData.append('file', file);
-  
-  const response = await api.post('/upload/', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-  
-  return response.data;
-};
+  constructor(baseUrl: string = API_BASE_URL) {
+    this.baseUrl = baseUrl;
+  }
 
-export const getUploadStatus = async (reportId: string): Promise<ReportInfo> => {
-  const response = await api.get(`/upload/status/${reportId}`);
-  return response.data;
-};
+  private async request<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<ApiResponse<T>> {
+    try {
+      const url = `${this.baseUrl}/api/v1${endpoint}`;
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+        ...options,
+      });
 
-// Reports
-export const getReports = async (params?: {
-  status?: string;
-  limit?: number;
-  offset?: number;
-}): Promise<ReportInfo[]> => {
-  const response = await api.get('/reports/', { params });
-  return response.data;
-};
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+      }
 
-export const getReportInfo = async (reportId: string): Promise<ReportInfo> => {
-  const response = await api.get(`/reports/${reportId}`);
-  return response.data;
-};
+      const data = await response.json();
+      return {
+        success: true,
+        data,
+      };
+    } catch (error) {
+      console.error('API Request failed:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+      };
+    }
+  }
 
-export const getReportMetadata = async (reportId: string): Promise<ReportMetadata> => {
-  const response = await api.get(`/reports/${reportId}/metadata`);
-  return response.data;
-};
+  // Upload endpoints
+  async uploadReport(file: File): Promise<ApiResponse<{ report_id: string; message: string }>> {
+    const formData = new FormData();
+    formData.append('file', file);
 
-export const getReportSections = async (reportId: string): Promise<{
-  report_id: string;
-  sections: ReportSection[];
-}> => {
-  const response = await api.get(`/reports/${reportId}/sections`);
-  return response.data;
-};
+    return this.request('/upload', {
+      method: 'POST',
+      body: formData,
+      headers: {}, // Don't set Content-Type for FormData
+    });
+  }
 
-export const getReportFields = async (reportId: string, params?: {
-  section_type?: string;
-  field_type?: string;
-}): Promise<{
-  report_id: string;
-  total_fields: number;
-  fields: (ReportField & { section_name: string; section_type: string })[];
-}> => {
-  const response = await api.get(`/reports/${reportId}/fields`, { params });
-  return response.data;
-};
+  // Report metadata endpoints
+  async getReportMetadata(reportId: string): Promise<ApiResponse<ReportMetadata>> {
+    return this.request(`/reports/${reportId}/metadata`);
+  }
 
-export const getDatabaseInfo = async (reportId: string): Promise<{
-  report_id: string;
-  database_connections: any[];
-  tables: string[];
-}> => {
-  const response = await api.get(`/reports/${reportId}/database-info`);
-  return response.data;
-};
+  async listReports(): Promise<ApiResponse<ReportMetadata[]>> {
+    return this.request('/reports');
+  }
 
-export const deleteReport = async (reportId: string): Promise<{
-  message: string;
-  report_id: string;
-}> => {
-  const response = await api.delete(`/reports/${reportId}`);
-  return response.data;
-};
+  // Query endpoints
+  async queryReport(
+    reportId: string,
+    question: string,
+    context?: string
+  ): Promise<ApiResponse<QueryResponse>> {
+    return this.request(`/reports/${reportId}/query`, {
+      method: 'POST',
+      body: JSON.stringify({
+        question,
+        context,
+      }),
+    });
+  }
 
-// Query
-export const queryReport = async (
-  reportId: string,
-  queryRequest: QueryRequest
-): Promise<QueryResponse> => {
-  const response = await api.post(`/query/${reportId}`, queryRequest);
-  return response.data;
-};
+  // Chat endpoint for general AI assistance
+  async chatWithAI(
+    messages: ChatMessage[],
+    reportId?: string
+  ): Promise<ApiResponse<{ response: string; sources?: string[] }>> {
+    return this.request('/chat', {
+      method: 'POST',
+      body: JSON.stringify({
+        messages,
+        report_id: reportId,
+      }),
+    });
+  }
 
-export const getQuerySuggestions = async (reportId: string): Promise<{
-  report_id: string;
-  suggestions: string[];
-}> => {
-  const response = await api.get(`/query/${reportId}/suggestions`);
-  return response.data;
-};
+  // Edit endpoints
+  async previewEdit(
+    reportId: string,
+    patches: any[]
+  ): Promise<ApiResponse<{ preview_description: string; warnings: string[] }>> {
+    return this.request(`/reports/${reportId}/edit/preview`, {
+      method: 'POST',
+      body: JSON.stringify({ patches }),
+    });
+  }
 
-export const explainField = async (
-  reportId: string,
-  fieldId: string
-): Promise<{
-  field_id: string;
-  field_name: string;
-  explanation: QueryResponse;
-}> => {
-  const response = await api.post(`/query/${reportId}/explain-field`, null, {
-    params: { field_id: fieldId },
-  });
-  return response.data;
-};
+  async applyEdit(
+    reportId: string,
+    patches: any[],
+    description?: string
+  ): Promise<ApiResponse<{ change_id: string; message: string }>> {
+    return this.request(`/reports/${reportId}/edit/apply`, {
+      method: 'POST',
+      body: JSON.stringify({
+        patches,
+        description,
+      }),
+    });
+  }
 
-// Edit
-export const previewEdits = async (
-  reportId: string,
-  patches: EditPatch[]
-): Promise<EditPreviewResponse> => {
-  const response = await api.post(`/edit/${reportId}/preview`, patches);
-  return response.data;
-};
+  // Quick edit operations
+  async hideField(
+    reportId: string,
+    fieldId: string,
+    description?: string
+  ): Promise<ApiResponse<{ change_id: string; message: string }>> {
+    return this.request(`/reports/${reportId}/fields/${fieldId}/hide`, {
+      method: 'POST',
+      body: JSON.stringify({ description }),
+    });
+  }
 
-export const applyEdits = async (
-  reportId: string,
-  request: ApplyEditsRequest
-): Promise<ApplyEditsResponse> => {
-  const response = await api.post(`/edit/${reportId}/apply`, request);
-  return response.data;
-};
+  async renameField(
+    reportId: string,
+    fieldId: string,
+    newName: string,
+    description?: string
+  ): Promise<ApiResponse<{ change_id: string; message: string }>> {
+    return this.request(`/reports/${reportId}/fields/${fieldId}/rename`, {
+      method: 'POST',
+      body: JSON.stringify({
+        new_name: newName,
+        description,
+      }),
+    });
+  }
 
-export const hideField = async (
-  reportId: string,
-  fieldId: string,
-  description?: string
-): Promise<{
-  message: string;
-  patch_id: string;
-  success: boolean;
-}> => {
-  const response = await api.post(`/edit/${reportId}/hide-field`, null, {
-    params: { field_id: fieldId, description },
-  });
-  return response.data;
-};
+  // Audit log endpoints
+  async getChangeLog(reportId: string): Promise<ApiResponse<any[]>> {
+    return this.request(`/reports/${reportId}/changelog`);
+  }
 
-export const renameField = async (
-  reportId: string,
-  fieldId: string,
-  newName: string,
-  description?: string
-): Promise<{
-  message: string;
-  patch_id: string;
-  success: boolean;
-}> => {
-  const response = await api.post(`/edit/${reportId}/rename-field`, null, {
-    params: { field_id: fieldId, new_name: newName, description },
-  });
-  return response.data;
-};
+  async downloadChangeLog(reportId: string): Promise<Blob | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/v1/reports/${reportId}/changelog.csv`);
+      if (response.ok) {
+        return await response.blob();
+      }
+    } catch (error) {
+      console.error('Failed to download changelog:', error);
+    }
+    return null;
+  }
 
-export const moveField = async (
-  reportId: string,
-  fieldId: string,
-  position: { x: number; y: number; width?: number; height?: number },
-  description?: string
-): Promise<{
-  message: string;
-  patch_id: string;
-  success: boolean;
-}> => {
-  const response = await api.post(`/edit/${reportId}/move-field`, null, {
-    params: { 
-      field_id: fieldId, 
-      x: position.x, 
-      y: position.y,
-      width: position.width,
-      height: position.height,
-      description 
-    },
-  });
-  return response.data;
-};
+  // Health check
+  async healthCheck(): Promise<ApiResponse<{ status: string; version: string }>> {
+    return this.request('/health');
+  }
+}
 
-export const getChangeLog = async (
-  reportId: string,
-  params?: { limit?: number; offset?: number }
-): Promise<{
-  report_id: string;
-  total_entries: number;
-  entries: any[];
-}> => {
-  const response = await api.get(`/edit/${reportId}/changelog`, { params });
-  return response.data;
-};
-
-export const downloadChangeLog = async (reportId: string): Promise<Blob> => {
-  const response = await api.get(`/reports/${reportId}/changelog.csv`, {
-    responseType: 'blob',
-  });
-  return response.data;
-};
-
-export default api;
+// Export singleton instance
+export const apiService = new ApiService();
+export default apiService;
