@@ -9,22 +9,8 @@ module.exports = {
     extend: {
       colors: {
         sap: {
-          blue: '#0070f3',
-          'blue-dark': '#0051cc',
-          gold: '#ffc72c',
-          'gold-dark': '#e6b800',
-          gray: {
-            50: '#f9fafb',
-            100: '#f3f4f6',
-            200: '#e5e7eb',
-            300: '#d1d5db',
-            400: '#9ca3af',
-            500: '#6b7280',
-            600: '#4b5563',
-            700: '#374151',
-            800: '#1f2937',
-            900: '#111827',
-          }
+          blue: '#1777FF',
+          accent: '#45C894',
         },
         primary: {
           50: '#eff6ff',
