@@ -88,8 +88,15 @@ export default function HomePage() {
   };
 
   return (
-    <CrystalLayout activeView={activeView} onViewChange={setActiveView}>
-      {renderContent()}
-    </CrystalLayout>
+    <div>
+      {/* 🚨 TEMPORARY TEST BANNER - If you see this, changes are working! */}
+      <div className="bg-yellow-400 text-black text-center py-2 font-bold text-lg">
+        🚨 UI CHANGES ARE WORKING! This yellow banner proves it! 🚨
+      </div>
+      
+      <CrystalLayout activeView={activeView} onViewChange={setActiveView}>
+        {renderContent()}
+      </CrystalLayout>
+    </div>
   );
 }
