@@ -1,0 +1,205 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  html {
+    font-family: Inter, system-ui, sans-serif;
+  }
+  
+  body {
+    @apply antialiased;
+  }
+}
+
+@layer components {
+  /* Button styles */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
+  }
+  
+  .btn-primary {
+    @apply bg-sap-blue text-white hover:bg-sap-blue-dark focus:ring-sap-blue;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500;
+  }
+  
+  .btn-success {
+    @apply bg-success-600 text-white hover:bg-success-700 focus:ring-success-500;
+  }
+  
+  .btn-warning {
+    @apply bg-warning-600 text-white hover:bg-warning-700 focus:ring-warning-500;
+  }
+  
+  .btn-error {
+    @apply bg-error-600 text-white hover:bg-error-700 focus:ring-error-500;
+  }
+  
+  .btn-outline {
+    @apply border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-sap-blue;
+  }
+  
+  /* Input styles */
+  .input {
+    @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-sap-blue focus:ring-sap-blue sm:text-sm;
+  }
+  
+  .input-error {
+    @apply border-error-300 text-error-900 placeholder-error-300 focus:border-error-500 focus:ring-error-500;
+  }
+  
+  /* Card styles */
+  .card {
+    @apply bg-white rounded-lg border border-gray-200 shadow-sm;
+  }
+  
+  .card-header {
+    @apply px-6 py-4 border-b border-gray-200;
+  }
+  
+  .card-body {
+    @apply px-6 py-4;
+  }
+  
+  .card-footer {
+    @apply px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg;
+  }
+  
+  /* Loading styles */
+  .loading-spinner {
+    @apply inline-block animate-spin rounded-full border-2 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite];
+  }
+  
+  /* Status badges */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+  
+  .badge-success {
+    @apply bg-success-100 text-success-800;
+  }
+  
+  .badge-warning {
+    @apply bg-warning-100 text-warning-800;
+  }
+  
+  .badge-error {
+    @apply bg-error-100 text-error-800;
+  }
+  
+  .badge-info {
+    @apply bg-primary-100 text-primary-800;
+  }
+  
+  .badge-gray {
+    @apply bg-gray-100 text-gray-800;
+  }
+  
+  /* Drag and drop styles */
+  .dropzone {
+    @apply border-2 border-dashed border-gray-300 rounded-lg transition-colors;
+  }
+  
+  .dropzone-active {
+    @apply border-sap-blue bg-sap-blue bg-opacity-5;
+  }
+  
+  .dropzone-accept {
+    @apply border-success-400 bg-success-50;
+  }
+  
+  .dropzone-reject {
+    @apply border-error-400 bg-error-50;
+  }
+  
+  /* Chat styles */
+  .chat-message {
+    @apply mb-4 flex;
+  }
+  
+  .chat-message-user {
+    @apply justify-end;
+  }
+  
+  .chat-message-assistant {
+    @apply justify-start;
+  }
+  
+  .chat-bubble {
+    @apply max-w-xs lg:max-w-md px-4 py-2 rounded-lg;
+  }
+  
+  .chat-bubble-user {
+    @apply bg-sap-blue text-white rounded-br-none;
+  }
+  
+  .chat-bubble-assistant {
+    @apply bg-white border border-gray-200 text-gray-900 rounded-bl-none;
+  }
+  
+  /* Code syntax highlighting */
+  .code-block {
+    @apply bg-gray-900 rounded-lg p-4 overflow-x-auto;
+  }
+  
+  .code-block code {
+    @apply text-gray-100 text-sm font-mono;
+  }
+  
+  /* Report field styles */
+  .report-field {
+    @apply border border-gray-200 rounded-lg p-3 hover:border-sap-blue transition-colors cursor-pointer;
+  }
+  
+  .report-field-selected {
+    @apply border-sap-blue bg-sap-blue bg-opacity-5;
+  }
+  
+  .report-field-hidden {
+    @apply opacity-50 bg-gray-50;
+  }
+  
+  /* Diff styles */
+  .diff-added {
+    @apply bg-success-50 border-success-200 text-success-900;
+  }
+  
+  .diff-removed {
+    @apply bg-error-50 border-error-200 text-error-900;
+  }
+  
+  .diff-modified {
+    @apply bg-warning-50 border-warning-200 text-warning-900;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-gray-100;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
+  }
+}

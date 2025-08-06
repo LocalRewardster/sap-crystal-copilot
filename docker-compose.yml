@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # Backend API Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=true
+      - SECRET_KEY=dev-secret-key-change-in-production-minimum-32-chars
+      - DATABASE_URL=sqlite:///./data/crystal_copilot.db
+      - REDIS_URL=redis://redis:6379/0
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    volumes:
+      - ./backend:/app
+      - backend_data:/app/data
+      - backend_uploads:/app/uploads
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - crystal-copilot
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NODE_ENV=development
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - crystal-copilot
+
+  # Redis Cache Service
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - crystal-copilot
+
+  # Crystal Reports Processing Service (Windows Container)
+  crystal-processor:
+    build:
+      context: ./docker/crystal
+      dockerfile: Dockerfile.windows
+    volumes:
+      - crystal_reports:/reports
+      - crystal_output:/output
+    environment:
+      - RPTTOXML_PATH=C:\\CrystalTools\\RptToXml.exe
+    restart: unless-stopped
+    networks:
+      - crystal-copilot
+    # Note: This requires Docker Desktop with Windows containers enabled
+    platform: windows/amd64
+
+volumes:
+  backend_data:
+  backend_uploads:
+  redis_data:
+  crystal_reports:
+  crystal_output:
+
+networks:
+  crystal-copilot:
+    driver: bridge
