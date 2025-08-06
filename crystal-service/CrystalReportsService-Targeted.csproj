@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Platform>x86</Platform>
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Cors" Version="2.2.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <!-- Crystal Reports DLL References - Using the best paths found on your system -->
+  <ItemGroup>
+    <!-- Primary DLLs from root Crystal Reports directory (most stable) -->
+    <Reference Include="CrystalDecisions.CrystalReports.Engine">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\CrystalDecisions.CrystalReports.Engine.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="CrystalDecisions.Shared">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\CrystalDecisions.Shared.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    
+    <!-- Additional DLLs from managed dotnet4 folder (best .NET compatibility) -->
+    <Reference Include="CrystalDecisions.ReportSource">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Common\SAP BusinessObjects Enterprise XI 4.0\managed\dotnet4\CrystalDecisions.ReportSource.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="CrystalDecisions.Web">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Common\SAP BusinessObjects Enterprise XI 4.0\managed\dotnet4\CrystalDecisions.Web.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+
+    <!-- Additional required Crystal Reports assemblies -->
+    <Reference Include="CrystalDecisions.ReportAppServer.CommLayer">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Common\SAP BusinessObjects Enterprise XI 4.0\managed\dotnet4\CrystalDecisions.ReportAppServer.CommLayer.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="CrystalDecisions.ReportAppServer.DataDefModel">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Common\SAP BusinessObjects Enterprise XI 4.0\managed\dotnet4\CrystalDecisions.ReportAppServer.DataDefModel.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="CrystalDecisions.ReportAppServer.ClientDoc">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Common\SAP BusinessObjects Enterprise XI 4.0\managed\dotnet4\CrystalDecisions.ReportAppServer.ClientDoc.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="CrystalDecisions.ReportAppServer.ReportDefModel">
+      <HintPath>C:\Program Files (x86)\SAP BusinessObjects\Crystal Reports for .NET Framework 4.0\Common\SAP BusinessObjects Enterprise XI 4.0\managed\dotnet4\CrystalDecisions.ReportAppServer.ReportDefModel.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>
