@@ -1,10 +1,12 @@
 'use client';
 
+import './emergency-styles.css';
+
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900">
+    <div className="min-h-screen bg-gradient-main">
       {/* MASSIVE OBVIOUS HEADER */}
-      <div className="bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500 text-white text-center py-8">
+      <div className="bg-gradient-header text-white text-center py-8">
         <h1 className="text-6xl font-bold animate-bounce">
           🚨 PROFESSIONAL UI IS WORKING! 🚨
         </h1>
