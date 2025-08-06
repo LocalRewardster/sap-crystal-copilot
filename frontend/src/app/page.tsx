@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import ActionCard from '@/components/ActionCard';
+import ReportAnalysis from '@/components/ReportAnalysis';
 import { apiService, type ChatMessage } from '@/services/api';
 import { 
   FileText, 
@@ -35,6 +36,18 @@ export default function HomePage() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadComplete, setUploadComplete] = useState(false);
+  const [currentReportId, setCurrentReportId] = useState<string | null>(null);
+  
+  const handleFieldOperation = (operation: string, fieldId: string, details?: any) => {
+    const operationMessage: ChatMessage = {
+      role: 'assistant',
+      content: `Field operation completed: ${operation} on field ${fieldId}. ${
+        details?.newName ? `New name: "${details.newName}". ` : ''
+      }The change has been applied to your report. You can ask me about the impact or make additional modifications.`,
+      timestamp: new Date().toISOString()
+    };
+    setChatHistory(prev => [...prev, operationMessage]);
+  };
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([
     { 
       role: 'assistant', 
@@ -58,8 +71,8 @@ export default function HomePage() {
       setIsLoadingChat(true);
 
       try {
-        // Get the current report ID if we have an uploaded file
-        const reportId = uploadComplete && selectedFile ? 'demo-report-id' : undefined;
+        // Use the actual report ID if available
+        const reportId = currentReportId;
         
         // Send to API
         const response = await apiService.chatWithAI([...chatHistory, userMessage], reportId);
@@ -123,11 +136,20 @@ export default function HomePage() {
       // Try real API upload first
       const response = await apiService.uploadReport(selectedFile);
       
-      if (response.success) {
+      if (response.success && response.data) {
         // Real upload successful
         setUploadProgress(100);
         setIsUploading(false);
         setUploadComplete(true);
+        setCurrentReportId(response.data.report_id);
+        
+        // Update chat context with report info
+        const reportContextMessage: ChatMessage = {
+          role: 'assistant',
+          content: `Great! I've successfully analyzed your Crystal Report "${selectedFile.name}". I can now help you with specific questions about this report's structure, fields, data sources, and more. What would you like to know?`,
+          timestamp: new Date().toISOString()
+        };
+        setChatHistory(prev => [...prev, reportContextMessage]);
         
         // Switch to reports view to show the uploaded report
         setTimeout(() => {
