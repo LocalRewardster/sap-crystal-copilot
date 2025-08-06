@@ -11,7 +11,11 @@ export const metadata: Metadata = {
   description: 'AI-powered Crystal Reports analysis and editing platform',
   keywords: ['SAP', 'Crystal Reports', 'AI', 'Report Editor', 'BusinessObjects'],
   authors: [{ name: 'SAP Product Management BI' }],
-  viewport: 'width=device-width, initial-scale=1',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({
