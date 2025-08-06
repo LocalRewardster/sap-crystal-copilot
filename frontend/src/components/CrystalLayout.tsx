@@ -82,93 +82,94 @@ export default function CrystalLayout({ children, activeView = 'reports', onView
   ];
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      {/* Top Menu Bar - Crystal Reports Style */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="flex items-center justify-between px-6 py-3">
+    <div className="h-screen flex flex-col bg-slate-50">
+      {/* Professional SAP-Style Header */}
+      <div className="bg-white border-b border-slate-200 shadow-lg">
+        {/* Main Header */}
+        <div className="flex items-center justify-between px-8 py-4 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900">
           <div className="flex items-center space-x-6">
-            {/* Logo and Title */}
+            {/* SAP-Style Logo and Branding */}
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm">
-                <FileText className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg border border-blue-400">
+                <FileText className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-gray-900">Crystal Copilot</h1>
-                <p className="text-sm text-gray-500">AI Report Editor</p>
+                <h1 className="text-2xl font-bold text-white tracking-tight">SAP Crystal Copilot</h1>
+                <p className="text-blue-200 text-sm font-medium">AI-Powered Report Editor</p>
               </div>
             </div>
 
-            {/* Main Menu */}
-            <nav className="hidden md:flex items-center space-x-2">
-              <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors">
+            {/* Enterprise Navigation */}
+            <nav className="hidden lg:flex items-center space-x-1 ml-8">
+              <button className="px-4 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-all duration-200">
                 File
               </button>
-              <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors">
+              <button className="px-4 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-all duration-200">
                 Edit
               </button>
-              <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors">
+              <button className="px-4 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-all duration-200">
                 View
               </button>
-              <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors">
-                Insert
-              </button>
-              <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors">
+              <button className="px-4 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-all duration-200">
                 Tools
               </button>
-              <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors">
+              <button className="px-4 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-all duration-200">
                 Help
               </button>
             </nav>
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* Search */}
+            {/* Professional Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search reports..."
-                className="pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors w-64"
+                placeholder="Search reports, fields, or ask AI..."
+                className="pl-12 pr-4 py-3 text-sm bg-slate-700 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-slate-400 w-80 transition-all duration-200"
               />
             </div>
 
-            {/* User Menu */}
+            {/* User Profile */}
             <div className="flex items-center space-x-3">
-              <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+              <button className="p-2.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-all duration-200">
                 <Settings className="w-5 h-5" />
               </button>
-              <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+              <button className="p-2.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded-lg transition-all duration-200">
                 <HelpCircle className="w-5 h-5" />
               </button>
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center shadow-sm">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg border border-blue-400">
                 <User className="w-5 h-5 text-white" />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Toolbar */}
-        <div className="border-t border-gray-200 bg-gray-50 px-6 py-3">
+        {/* Professional Toolbar */}
+        <div className="bg-slate-50 border-t border-slate-200 px-8 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <button className="flex items-center space-x-2 px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm transition-colors">
+            <div className="flex items-center space-x-4">
+              <button className="flex items-center space-x-3 px-6 py-3 text-sm font-semibold bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-200 border border-blue-500">
                 <FileText className="w-4 h-4" />
                 <span>New Report</span>
               </button>
-              <button className="flex items-center space-x-2 px-4 py-2 text-sm font-medium border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 shadow-sm transition-colors">
+              <button className="flex items-center space-x-3 px-6 py-3 text-sm font-semibold border border-slate-300 bg-white text-slate-700 rounded-lg hover:bg-slate-50 hover:border-slate-400 shadow-md hover:shadow-lg transition-all duration-200">
                 <Folder className="w-4 h-4" />
-                <span>Open</span>
+                <span>Open Report</span>
               </button>
-              <button className="flex items-center space-x-2 px-4 py-2 text-sm font-medium border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 shadow-sm transition-colors">
+              <button className="flex items-center space-x-3 px-6 py-3 text-sm font-semibold border border-slate-300 bg-white text-slate-700 rounded-lg hover:bg-slate-50 hover:border-slate-400 shadow-md hover:shadow-lg transition-all duration-200">
                 <Download className="w-4 h-4" />
                 <span>Export</span>
               </button>
             </div>
 
-            <div className="flex items-center space-x-3 text-sm">
-              <div className="flex items-center space-x-2 px-3 py-1.5 bg-green-50 text-green-700 rounded-full">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="font-medium">Ready</span>
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-3 px-4 py-2 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 rounded-full border border-green-200">
+                <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="font-semibold text-sm">AI Ready</span>
+              </div>
+              <div className="text-sm text-slate-500">
+                <span className="font-medium">Version 1.0.0</span> • <span>Enterprise Edition</span>
               </div>
             </div>
           </div>
@@ -176,70 +177,69 @@ export default function CrystalLayout({ children, activeView = 'reports', onView
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar - Crystal Reports Explorer Style */}
-        <div className={`bg-white border-r border-gray-200 transition-all duration-300 shadow-sm ${
-          sidebarCollapsed ? 'w-16' : 'w-72'
+        {/* Professional Sidebar - Enterprise Style */}
+        <div className={`bg-gradient-to-b from-slate-50 to-slate-100 border-r border-slate-300 transition-all duration-300 shadow-xl ${
+          sidebarCollapsed ? 'w-20' : 'w-80'
         }`}>
-          {/* Sidebar Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
-            {!sidebarCollapsed && (
-              <h2 className="text-base font-semibold text-gray-900">Explorer</h2>
-            )}
-            <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Navigation Items */}
-          <div className="p-3 space-y-2">
-            {navigationItems.map((item) => (
+          <div className="flex flex-col h-full">
+            {/* Sidebar Header */}
+            <div className="flex items-center justify-between p-6 border-b border-slate-300 bg-white shadow-sm">
+              <h2 className={`font-bold text-slate-800 text-lg transition-opacity ${
+                sidebarCollapsed ? 'opacity-0' : 'opacity-100'
+              }`}>
+                Report Explorer
+              </h2>
               <button
-                key={item.id}
-                onClick={() => handleViewChange(item.id)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                  activeView === item.id
-                    ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-sm'
-                    : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-                }`}
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all duration-200 shadow-sm"
               >
-                <item.icon className="w-5 h-5 flex-shrink-0" />
-                {!sidebarCollapsed && (
-                  <>
-                    <span className="flex-1 text-left">{item.label}</span>
-                    {item.badge && (
-                      <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full font-medium">
-                        {item.badge}
-                      </span>
-                    )}
-                  </>
-                )}
+                {sidebarCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
               </button>
-            ))}
-          </div>
+            </div>
 
-          {/* Tools Section */}
-          <div className="border-t border-gray-200 mt-6">
-            <div className="p-3">
-              {!sidebarCollapsed && (
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 px-1">
-                  AI Tools
-                </h3>
-              )}
-              <div className="space-y-2">
-                {toolItems.map((item) => (
+            {/* Quick Actions */}
+            {!sidebarCollapsed && (
+              <div className="p-6 bg-white border-b border-slate-200">
+                <div className="grid grid-cols-3 gap-3">
+                  <button className="flex flex-col items-center space-y-2 p-4 bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-xl border border-blue-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <FileText className="w-6 h-6 text-blue-600" />
+                    <span className="text-xs font-semibold text-blue-700">New Report</span>
+                  </button>
+                  <button className="flex flex-col items-center space-y-2 p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200 rounded-xl border border-emerald-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <Folder className="w-6 h-6 text-emerald-600" />
+                    <span className="text-xs font-semibold text-emerald-700">Open</span>
+                  </button>
+                  <button className="flex flex-col items-center space-y-2 p-4 bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-xl border border-purple-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <Download className="w-6 h-6 text-purple-600" />
+                    <span className="text-xs font-semibold text-purple-700">Export</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Navigation Items */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-3">
+                {navigationItems.map((item) => (
                   <button
                     key={item.id}
-                    className="w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors"
+                    onClick={() => handleViewChange(item.id)}
+                    className={`w-full flex items-center space-x-4 px-5 py-4 text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow-md ${
+                      activeView === item.id
+                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg border border-blue-400'
+                        : 'bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 border border-slate-200'
+                    }`}
                   >
                     <item.icon className="w-5 h-5 flex-shrink-0" />
                     {!sidebarCollapsed && (
                       <>
                         <span className="flex-1 text-left">{item.label}</span>
                         {item.badge && (
-                          <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full font-medium">
+                          <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                            activeView === item.id
+                              ? 'bg-white/20 text-white'
+                              : 'bg-blue-100 text-blue-700'
+                          }`}>
                             {item.badge}
                           </span>
                         )}
@@ -248,47 +248,129 @@ export default function CrystalLayout({ children, activeView = 'reports', onView
                   </button>
                 ))}
               </div>
+
+              {/* AI Tools Section */}
+              {!sidebarCollapsed && (
+                <div className="mt-8">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <div className="w-8 h-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></div>
+                    <h3 className="text-sm font-bold text-slate-600 uppercase tracking-wider">
+                      AI Tools
+                    </h3>
+                    <div className="flex-1 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+                  </div>
+                  <div className="space-y-3">
+                    {toolItems.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => handleViewChange(item.id)}
+                        className={`w-full flex items-center space-x-4 px-5 py-4 text-sm font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow-md ${
+                          item.id === 'chat' 
+                            ? 'bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 text-indigo-700 border border-indigo-200'
+                            : 'bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200'
+                        }`}
+                      >
+                        <item.icon className="w-5 h-5 flex-shrink-0" />
+                        {!sidebarCollapsed && (
+                          <>
+                            <span className="flex-1 text-left">{item.label}</span>
+                            {item.badge && (
+                              <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                                item.id === 'chat'
+                                  ? 'bg-gradient-to-r from-green-400 to-emerald-500 text-white animate-pulse'
+                                  : 'bg-green-100 text-green-700'
+                              }`}>
+                                {item.badge}
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
+
+            {/* Status Footer */}
+            {!sidebarCollapsed && (
+              <div className="p-6 bg-white border-t border-slate-200">
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="font-semibold text-slate-700">Connected</span>
+                  </div>
+                  <span className="text-slate-500">SAP Enterprise</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Breadcrumb */}
-          <div className="bg-white border-b border-gray-200 px-6 py-4 shadow-sm">
-            <div className="flex items-center space-x-2 text-sm">
-              <span className="text-gray-500">Crystal Copilot</span>
-              <ChevronRight className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-900 font-semibold">
-                {navigationItems.find(item => item.id === activeView)?.label || 'My Reports'}
-              </span>
+        {/* Professional Main Content Area */}
+        <div className="flex-1 flex flex-col overflow-hidden bg-slate-50">
+          {/* Enterprise Breadcrumb */}
+          <div className="bg-white border-b border-slate-200 px-8 py-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3 text-sm">
+                <div className="flex items-center space-x-2 px-3 py-1.5 bg-slate-100 rounded-lg">
+                  <FileText className="w-4 h-4 text-slate-600" />
+                  <span className="font-semibold text-slate-700">SAP Crystal Copilot</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-400" />
+                <span className="text-slate-900 font-bold text-base">
+                  {navigationItems.find(item => item.id === activeView)?.label || 'My Reports'}
+                </span>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg border border-green-200">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-semibold">System Ready</span>
+                </div>
+                <div className="text-sm text-slate-500">
+                  Last updated: {new Date().toLocaleTimeString()}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Content */}
-          <div className="flex-1 overflow-auto bg-gray-50">
-            <div className="h-full">
-              {children}
+          {/* Premium Content Area */}
+          <div className="flex-1 overflow-auto bg-gradient-to-br from-slate-50 to-slate-100">
+            <div className="h-full p-8">
+              <div className="max-w-full h-full bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+                <div className="h-full flex flex-col">
+                  {children}
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Status Bar */}
-      <div className="bg-gray-50 border-t border-gray-200 px-6 py-3">
-        <div className="flex items-center justify-between text-sm text-gray-600">
-          <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span>Ready for analysis</span>
+      {/* Professional Status Bar */}
+      <div className="bg-gradient-to-r from-slate-800 to-slate-900 border-t border-slate-700 px-8 py-4 shadow-2xl">
+        <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center space-x-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg"></div>
+              <span className="text-slate-300 font-medium">AI System Active</span>
             </div>
-            <span className="text-gray-400">•</span>
-            <span>12 reports loaded</span>
+            <div className="w-px h-4 bg-slate-600"></div>
+            <span className="text-slate-400">Reports: <span className="text-white font-semibold">12 loaded</span></span>
+            <div className="w-px h-4 bg-slate-600"></div>
+            <span className="text-slate-400">Storage: <span className="text-white font-semibold">2.4GB available</span></span>
           </div>
-          <div className="flex items-center space-x-6">
-            <span>API: Connected</span>
-            <span className="text-gray-400">•</span>
-            <span>Crystal Copilot v1.0.0</span>
+          
+          <div className="flex items-center space-x-8">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+              <span className="text-slate-300 font-medium">API Connected</span>
+            </div>
+            <div className="w-px h-4 bg-slate-600"></div>
+            <span className="text-slate-400">Version: <span className="text-white font-semibold">Enterprise 1.0.0</span></span>
+            <div className="w-px h-4 bg-slate-600"></div>
+            <span className="text-slate-400">License: <span className="text-green-400 font-semibold">SAP Authorized</span></span>
           </div>
         </div>
       </div>

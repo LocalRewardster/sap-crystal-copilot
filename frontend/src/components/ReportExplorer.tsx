@@ -93,18 +93,14 @@ export default function ReportExplorer({ onViewChange }: ReportExplorerProps) {
 
   if (isLoading) {
     return (
-      <div className="p-6">
-        <div className="space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="flex items-center space-x-4 p-4 bg-white rounded-lg border animate-pulse">
-              <div className="w-5 h-5 bg-gray-300 rounded" />
-              <div className="flex-1 space-y-2">
-                <div className="h-4 bg-gray-300 rounded w-1/3" />
-                <div className="h-3 bg-gray-300 rounded w-1/2" />
-              </div>
-              <div className="w-16 h-4 bg-gray-300 rounded" />
-            </div>
-          ))}
+      <div className="flex items-center justify-center min-h-96 p-8">
+        <div className="text-center">
+          <div className="relative mb-8">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-slate-200 mx-auto"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent absolute top-0 left-1/2 transform -translate-x-1/2"></div>
+          </div>
+          <h3 className="text-xl font-bold text-slate-800 mb-2">Loading Reports</h3>
+          <p className="text-slate-600">Fetching your Crystal Reports from the server...</p>
         </div>
       </div>
     );
@@ -112,21 +108,19 @@ export default function ReportExplorer({ onViewChange }: ReportExplorerProps) {
 
   if (error) {
     return (
-      <div className="p-6">
-        <div className="text-center py-12">
-          <FileX className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Failed to load reports
-          </h3>
-          <p className="text-gray-600 mb-4">
-            There was an error loading your reports. Please try again.
-          </p>
+      <div className="flex items-center justify-center min-h-96 p-8">
+        <div className="text-center max-w-md">
+          <div className="w-20 h-20 bg-gradient-to-br from-red-50 to-red-100 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg border border-red-200">
+            <FileX className="w-10 h-10 text-red-600" />
+          </div>
+          <h3 className="text-2xl font-bold text-slate-900 mb-3">Connection Error</h3>
+          <p className="text-slate-600 mb-6 leading-relaxed">Unable to connect to the report server. Please check your connection and try again.</p>
           <button
             onClick={() => refetch()}
-            className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl font-semibold"
           >
-            <RefreshCw className="w-4 h-4" />
-            <span>Retry</span>
+            <RefreshCw className="w-5 h-5 mr-3" />
+            Retry Connection
           </button>
         </div>
       </div>
