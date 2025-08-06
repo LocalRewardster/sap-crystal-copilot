@@ -31,6 +31,9 @@ export default function HomePage() {
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [chatMessage, setChatMessage] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadComplete, setUploadComplete] = useState(false);
   const [chatHistory, setChatHistory] = useState([
     { type: 'assistant', message: 'Hello! I\'m your Crystal Reports AI assistant. How can I help you today?' }
   ]);
@@ -50,9 +53,8 @@ export default function HomePage() {
     if (file) {
       if (file.name.toLowerCase().endsWith('.rpt')) {
         setSelectedFile(file);
-        // Here you would typically upload the file to your backend
+        setUploadComplete(false);
         console.log('Selected file:', file.name, file.size);
-        alert(`File selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
       } else {
         alert('Please select a Crystal Reports (.rpt) file.');
       }
@@ -64,7 +66,40 @@ export default function HomePage() {
     fileInput?.click();
   };
 
+  const handleUpload = async () => {
+    if (!selectedFile) return;
+    
+    setIsUploading(true);
+    setUploadProgress(0);
+    setUploadComplete(false);
+
+    // Simulate upload progress
+    for (let progress = 0; progress <= 100; progress += 10) {
+      setUploadProgress(progress);
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+
+    // Simulate processing
+    setUploadProgress(100);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    setIsUploading(false);
+    setUploadComplete(true);
+    
+    // Switch to reports view to show the "uploaded" report
+    setTimeout(() => {
+      setActiveView('reports');
+      setShowUpload(false);
+    }, 2000);
+  };
+
   const sampleReports = [
+    ...(uploadComplete && selectedFile ? [{
+      name: selectedFile.name, 
+      status: 'Ready', 
+      size: `${(selectedFile.size / 1024 / 1024).toFixed(1)} MB`, 
+      modified: 'Just now'
+    }] : []),
     { name: 'Sales_Report_Q4.rpt', status: 'Ready', size: '2.4 MB', modified: '2 hours ago' },
     { name: 'Customer_Analysis.rpt', status: 'Processing', size: '1.8 MB', modified: '1 day ago' },
     { name: 'Financial_Summary.rpt', status: 'Ready', size: '3.2 MB', modified: '3 days ago' },
@@ -320,22 +355,70 @@ export default function HomePage() {
                   className="hidden"
                 />
                 
-                <button 
-                  onClick={triggerFileSelect}
-                  className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-                >
-                  Browse Files
-                </button>
+                {!selectedFile && (
+                  <button 
+                    onClick={triggerFileSelect}
+                    className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                  >
+                    Browse Files
+                  </button>
+                )}
                 
-                {selectedFile && (
+                {selectedFile && !isUploading && !uploadComplete && (
+                  <div className="mt-4">
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-md mb-4">
+                      <p className="text-sm text-blue-800">
+                        Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                      </p>
+                    </div>
+                    <div className="flex gap-2 justify-center">
+                      <button 
+                        onClick={handleUpload}
+                        className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600"
+                      >
+                        Upload & Process
+                      </button>
+                      <button 
+                        onClick={() => setSelectedFile(null)}
+                        className="px-4 py-2 bg-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {isUploading && (
+                  <div className="mt-4">
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-md mb-4">
+                      <p className="text-sm text-blue-800 mb-2">
+                        Uploading: {selectedFile?.name}
+                      </p>
+                      <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
+                        <div 
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                          style={{width: `${uploadProgress}%`}}
+                        ></div>
+                      </div>
+                      <p className="text-xs text-blue-600">{uploadProgress}% complete</p>
+                    </div>
+                  </div>
+                )}
+
+                {uploadComplete && (
                   <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
-                    <p className="text-sm text-green-800">
-                      Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
-                    </p>
+                    <div className="flex items-center justify-center">
+                      <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                      <p className="text-sm text-green-800">
+                        Upload successful! Redirecting to reports...
+                      </p>
+                    </div>
                   </div>
                 )}
                 
-                <p className="text-xs text-gray-500 mt-3">Maximum file size: 25MB</p>
+                {!selectedFile && (
+                  <p className="text-xs text-gray-500 mt-3">Maximum file size: 25MB</p>
+                )}
               </div>
             </div>
           </div>
