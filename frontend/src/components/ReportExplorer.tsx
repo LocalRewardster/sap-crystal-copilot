@@ -132,25 +132,33 @@ export default function ReportExplorer() {
   return (
     <div className="h-full flex flex-col">
       {/* Toolbar */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-white border-b border-gray-200 px-6 py-5 shadow-sm">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <h2 className="text-lg font-semibold text-gray-900">
+          <div className="flex items-center space-x-6">
+            <h2 className="text-xl font-bold text-gray-900">
               My Reports ({filteredReports.length})
             </h2>
             
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               {/* View Mode Toggle */}
-              <div className="flex border border-gray-300 rounded-md">
+              <div className="flex border border-gray-300 rounded-lg overflow-hidden">
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2 ${viewMode === 'list' ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
+                  className={`p-2.5 transition-colors ${
+                    viewMode === 'list' 
+                      ? 'bg-blue-50 text-blue-600 border-blue-200' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
                 >
                   <List className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-2 ${viewMode === 'grid' ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
+                  className={`p-2.5 transition-colors border-l border-gray-300 ${
+                    viewMode === 'grid' 
+                      ? 'bg-blue-50 text-blue-600 border-blue-200' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
                 >
                   <Grid className="w-4 h-4" />
                 </button>
@@ -160,7 +168,7 @@ export default function ReportExplorer() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="text-sm border border-gray-300 rounded-md px-3 py-2 bg-white"
+                className="text-sm border border-gray-300 rounded-lg px-3 py-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="modified">Sort by Modified</option>
                 <option value="name">Sort by Name</option>
@@ -171,7 +179,7 @@ export default function ReportExplorer() {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="text-sm border border-gray-300 rounded-md px-3 py-2 bg-white"
+                className="text-sm border border-gray-300 rounded-lg px-3 py-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="all">All Reports</option>
                 <option value="ready">Ready</option>
@@ -181,17 +189,17 @@ export default function ReportExplorer() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             <button
               onClick={() => refetch()}
               disabled={isLoading}
-              className="inline-flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 bg-white text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50"
+              className="inline-flex items-center space-x-2 px-4 py-2.5 text-sm border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 font-medium transition-colors"
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
               <span>Refresh</span>
             </button>
 
-            <button className="inline-flex items-center space-x-2 px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            <button className="inline-flex items-center space-x-2 px-4 py-2.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm font-medium transition-colors">
               <FileText className="w-4 h-4" />
               <span>Upload Report</span>
             </button>
@@ -202,18 +210,41 @@ export default function ReportExplorer() {
       {/* Content */}
       <div className="flex-1 overflow-auto p-6">
         {filteredReports.length === 0 ? (
-          <div className="text-center py-12">
-            <FolderOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No reports found
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Upload your first Crystal Report to get started with AI-powered analysis.
-            </p>
-            <button className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-              <FileText className="w-4 h-4" />
-              <span>Upload Report</span>
-            </button>
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center py-16 px-8 max-w-md">
+              <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <FolderOpen className="w-10 h-10 text-blue-500" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                No reports found
+              </h3>
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                Upload your first Crystal Report to get started with AI-powered analysis and editing. 
+                Our AI will help you understand field lineage, make edits, and optimize your reports.
+              </p>
+              <button className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm transition-colors font-medium">
+                <FileText className="w-5 h-5" />
+                <span>Upload Your First Report</span>
+              </button>
+              
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <p className="text-sm text-gray-500 mb-3">Quick tips to get started:</p>
+                <div className="text-left space-y-2">
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                    <span>Supports .rpt files up to 25MB</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                    <span>AI analysis completes in under 15 seconds</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                    <span>Ask questions in natural language</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         ) : (
           <div className={viewMode === 'grid' ? 
