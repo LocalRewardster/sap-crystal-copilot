@@ -30,6 +30,7 @@ export default function HomePage() {
   const [showChat, setShowChat] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [chatMessage, setChatMessage] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [chatHistory, setChatHistory] = useState([
     { type: 'assistant', message: 'Hello! I\'m your Crystal Reports AI assistant. How can I help you today?' }
   ]);
@@ -42,6 +43,25 @@ export default function HomePage() {
       ]);
       setChatMessage('');
     }
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.name.toLowerCase().endsWith('.rpt')) {
+        setSelectedFile(file);
+        // Here you would typically upload the file to your backend
+        console.log('Selected file:', file.name, file.size);
+        alert(`File selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+      } else {
+        alert('Please select a Crystal Reports (.rpt) file.');
+      }
+    }
+  };
+
+  const triggerFileSelect = () => {
+    const fileInput = document.getElementById('file-input') as HTMLInputElement;
+    fileInput?.click();
   };
 
   const sampleReports = [
@@ -290,9 +310,31 @@ export default function HomePage() {
                 <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h4 className="text-sm font-medium text-gray-900 mb-2">Drag and drop your .rpt file</h4>
                 <p className="text-sm text-gray-600 mb-4">Or click to browse and select a file</p>
-                <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
+                
+                {/* Hidden file input */}
+                <input
+                  id="file-input"
+                  type="file"
+                  accept=".rpt"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                
+                <button 
+                  onClick={triggerFileSelect}
+                  className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                >
                   Browse Files
                 </button>
+                
+                {selectedFile && (
+                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
+                    <p className="text-sm text-green-800">
+                      Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                    </p>
+                  </div>
+                )}
+                
                 <p className="text-xs text-gray-500 mt-3">Maximum file size: 25MB</p>
               </div>
             </div>
