@@ -20,11 +20,18 @@ import {
 
 interface CrystalLayoutProps {
   children: React.ReactNode;
+  activeView?: string;
+  onViewChange?: (view: string) => void;
 }
 
-export default function CrystalLayout({ children }: CrystalLayoutProps) {
+export default function CrystalLayout({ children, activeView = 'reports', onViewChange }: CrystalLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeView, setActiveView] = useState('reports');
+  
+  const handleViewChange = (view: string) => {
+    if (onViewChange) {
+      onViewChange(view);
+    }
+  };
 
   const navigationItems = [
     {
@@ -191,7 +198,7 @@ export default function CrystalLayout({ children }: CrystalLayoutProps) {
             {navigationItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => setActiveView(item.id)}
+                onClick={() => handleViewChange(item.id)}
                 className={`w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                   activeView === item.id
                     ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-sm'

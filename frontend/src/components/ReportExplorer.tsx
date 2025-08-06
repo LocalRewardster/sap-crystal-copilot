@@ -24,7 +24,11 @@ import {
 import { format } from 'date-fns';
 import { getReports, ReportInfo } from '@/services/api';
 
-export default function ReportExplorer() {
+interface ReportExplorerProps {
+  onViewChange?: (view: string) => void;
+}
+
+export default function ReportExplorer({ onViewChange }: ReportExplorerProps) {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [sortBy, setSortBy] = useState<'name' | 'modified' | 'size'>('modified');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -199,7 +203,10 @@ export default function ReportExplorer() {
               <span>Refresh</span>
             </button>
 
-            <button className="inline-flex items-center space-x-2 px-4 py-2.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm font-medium transition-colors">
+            <button 
+              onClick={() => onViewChange?.('upload')}
+              className="inline-flex items-center space-x-2 px-4 py-2.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm font-medium transition-colors"
+            >
               <FileText className="w-4 h-4" />
               <span>Upload Report</span>
             </button>
@@ -222,7 +229,10 @@ export default function ReportExplorer() {
                 Upload your first Crystal Report to get started with AI-powered analysis and editing. 
                 Our AI will help you understand field lineage, make edits, and optimize your reports.
               </p>
-              <button className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm transition-colors font-medium">
+              <button 
+                onClick={() => onViewChange?.('upload')}
+                className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm transition-colors font-medium"
+              >
                 <FileText className="w-5 h-5" />
                 <span>Upload Your First Report</span>
               </button>
