@@ -119,7 +119,9 @@ def debug_llm_service():
         if api_key and len(api_key) > 4:
             print(f"LLM Service API Key: ***{api_key[-4:]}")
             print(f"Key length: {len(api_key)}")
-            print(f"Key format check: starts with 'sk-or-v1-': {api_key.startswith('sk-or-v1-')}")
+            print(f"Key format check: starts with 'sk-or-v1-': {api_key.lower().startswith('sk-or-v1-')}")
+            print(f"Key starts with (case sensitive): {api_key.startswith('sk-or-v1-')}")
+            print(f"Key starts with (case insensitive): {api_key.lower().startswith('sk-or-v1-')}")
         else:
             print(f"LLM Service API Key: {api_key}")
         
