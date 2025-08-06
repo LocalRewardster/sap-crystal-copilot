@@ -105,7 +105,7 @@ async def chat_with_ai(
             )
             
             chat_response = ChatResponse(
-                response=response.response,
+                response=response.answer,
                 sources=response.sources if hasattr(response, 'sources') else None
             )
         else:
