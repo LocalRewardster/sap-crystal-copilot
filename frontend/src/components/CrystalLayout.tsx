@@ -9,6 +9,7 @@ import {
   HelpCircle, 
   Menu,
   ChevronRight,
+  ChevronLeft,
   Database,
   BarChart3,
   FileImage,
