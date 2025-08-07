@@ -28,13 +28,21 @@ class CrystalBridgeService:
     async def generate_preview(self, report_path: Path, format: str = "PDF", parameters: Optional[Dict] = None) -> bytes:
         """Generate a preview of the Crystal Report using the C# service."""
         try:
-            logger.info("Generating Crystal Report preview", report_path=str(report_path), format=format)
+            # Convert to absolute path and ensure it exists
+            abs_path = report_path.resolve()
+            if not abs_path.exists():
+                raise FileNotFoundError(f"Report file not found: {abs_path}")
+            
+            # Convert to Windows-compatible path string
+            path_str = str(abs_path).replace('/', '\\')
+            
+            logger.info("Generating Crystal Report preview", report_path=path_str, format=format)
             
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.post(
                     f"{self.crystal_service_url}/api/crystalreports/preview",
                     json={
-                        "reportPath": str(report_path),
+                        "reportPath": path_str,
                         "format": format,
                         "parameters": parameters or {}
                     }
@@ -63,12 +71,20 @@ class CrystalBridgeService:
     async def extract_metadata(self, report_path: Path) -> ReportMetadata:
         """Extract comprehensive metadata from Crystal Report using C# service."""
         try:
-            logger.info("Extracting Crystal Report metadata", report_path=str(report_path))
+            # Convert to absolute path and ensure it exists
+            abs_path = report_path.resolve()
+            if not abs_path.exists():
+                raise FileNotFoundError(f"Report file not found: {abs_path}")
+            
+            # Convert to Windows-compatible path string
+            path_str = str(abs_path).replace('/', '\\')
+            
+            logger.info("Extracting Crystal Report metadata", report_path=path_str)
             
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.post(
                     f"{self.crystal_service_url}/api/crystalreports/metadata",
-                    json={"reportPath": str(report_path)}
+                    json={"reportPath": path_str}
                 )
                 
                 if response.status_code == 200:
@@ -104,8 +120,16 @@ class CrystalBridgeService:
     async def modify_field(self, report_path: Path, field_name: str, operation: str, parameters: Optional[Dict] = None) -> bool:
         """Perform field operations using Crystal Reports C# service."""
         try:
+            # Convert to absolute path and ensure it exists
+            abs_path = report_path.resolve()
+            if not abs_path.exists():
+                raise FileNotFoundError(f"Report file not found: {abs_path}")
+            
+            # Convert to Windows-compatible path string
+            path_str = str(abs_path).replace('/', '\\')
+            
             logger.info("Performing Crystal Report field operation", 
-                       report_path=str(report_path), 
+                       report_path=path_str, 
                        field_name=field_name, 
                        operation=operation)
             
@@ -113,7 +137,7 @@ class CrystalBridgeService:
                 response = await client.post(
                     f"{self.crystal_service_url}/api/crystalreports/field-operation",
                     json={
-                        "reportPath": str(report_path),
+                        "reportPath": path_str,
                         "fieldName": field_name,
                         "operation": operation,
                         "parameters": parameters or {}
@@ -163,12 +187,20 @@ class CrystalBridgeService:
     async def validate_report(self, report_path: Path) -> bool:
         """Validate if Crystal Report is accessible using C# service."""
         try:
-            logger.info("Validating Crystal Report", report_path=str(report_path))
+            # Convert to absolute path and ensure it exists
+            abs_path = report_path.resolve()
+            if not abs_path.exists():
+                return False
+            
+            # Convert to Windows-compatible path string
+            path_str = str(abs_path).replace('/', '\\')
+            
+            logger.info("Validating Crystal Report", report_path=path_str)
             
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.post(
                     f"{self.crystal_service_url}/api/crystalreports/validate",
-                    json={"reportPath": str(report_path)}
+                    json={"reportPath": path_str}
                 )
                 
                 if response.status_code == 200:
@@ -195,13 +227,21 @@ class CrystalBridgeService:
     async def export_report(self, report_path: Path, format: str, parameters: Optional[Dict] = None) -> bytes:
         """Export Crystal Report to various formats."""
         try:
-            logger.info("Exporting Crystal Report", report_path=str(report_path), format=format)
+            # Convert to absolute path and ensure it exists
+            abs_path = report_path.resolve()
+            if not abs_path.exists():
+                raise FileNotFoundError(f"Report file not found: {abs_path}")
+            
+            # Convert to Windows-compatible path string
+            path_str = str(abs_path).replace('/', '\\')
+            
+            logger.info("Exporting Crystal Report", report_path=path_str, format=format)
             
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 response = await client.post(
                     f"{self.crystal_service_url}/api/crystalreports/export",
                     json={
-                        "reportPath": str(report_path),
+                        "reportPath": path_str,
                         "format": format,
                         "parameters": parameters or {}
                     }
