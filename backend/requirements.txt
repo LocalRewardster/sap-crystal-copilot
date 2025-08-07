@@ -21,6 +21,8 @@ sqlalchemy==2.0.23
 alembic==1.13.1
 asyncpg==0.29.0
 redis==5.0.1
+supabase==2.3.4
+postgrest==0.13.2
 
 # Security and authentication
 python-jose[cryptography]==3.3.0

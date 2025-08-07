@@ -46,6 +46,11 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = Field(env="DATABASE_URL", default="sqlite:///./crystal_copilot.db")
     
+    # Supabase Configuration
+    SUPABASE_URL: str = Field(env="SUPABASE_URL", default="")
+    SUPABASE_ANON_KEY: str = Field(env="SUPABASE_ANON_KEY", default="")
+    SUPABASE_SERVICE_KEY: str = Field(env="SUPABASE_SERVICE_KEY", default="")
+    
     # Redis Cache
     REDIS_URL: str = Field(env="REDIS_URL", default="redis://localhost:6379/0")
     
