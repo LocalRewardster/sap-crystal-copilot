@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using CrystalDecisions.CrystalReports.Engine;
 using CrystalDecisions.Shared;
+using CrystalDecisions.ReportSource;
 using CrystalReportsService.Models;
 
 namespace CrystalReportsService.Services
@@ -119,16 +120,43 @@ namespace CrystalReportsService.Services
 
                 byte[] result;
 
-                if (format.ToUpper() == "PDF")
+                // Create export options with database refresh disabled
+                var exportOptions = new ExportOptions();
+                var pdfFormatOptions = new PdfFormatOptions();
+                
+                // Set export format
+                exportOptions.ExportFormatType = ExportFormatType.PortableDocFormat;
+                exportOptions.ExportFormatOptions = pdfFormatOptions;
+                
+                // Critical: Disable database refresh during export
+                exportOptions.ExportDestinationType = ExportDestinationType.NoDestination;
+                
+                Console.WriteLine("Starting export with database refresh disabled...");
+                
+                try
                 {
-                    var stream = report.ExportToStream(ExportFormatType.PortableDocFormat);
+                    // Use ExportOptions to have more control over the export process
+                    var stream = report.ExportToStream(exportOptions);
                     result = ((MemoryStream)stream).ToArray();
+                    Console.WriteLine($"✅ Export successful: {result.Length} bytes generated");
                 }
-                else
+                catch (Exception exportEx)
                 {
-                    // Default to PDF
-                    var stream = report.ExportToStream(ExportFormatType.PortableDocFormat);
-                    result = ((MemoryStream)stream).ToArray();
+                    Console.WriteLine($"❌ Export with options failed: {exportEx.Message}");
+                    Console.WriteLine("Attempting fallback export method...");
+                    
+                    // Fallback: Try the original method as last resort
+                    try
+                    {
+                        var stream = report.ExportToStream(ExportFormatType.PortableDocFormat);
+                        result = ((MemoryStream)stream).ToArray();
+                        Console.WriteLine($"⚠️ Fallback export worked: {result.Length} bytes");
+                    }
+                    catch (Exception fallbackEx)
+                    {
+                        Console.WriteLine($"❌ Both export methods failed. Original: {exportEx.Message}, Fallback: {fallbackEx.Message}");
+                        throw new Exception($"Export failed: {exportEx.Message}");
+                    }
                 }
 
                 report.Close();
