@@ -18,6 +18,17 @@ namespace CrystalReportsService.Services
                 var report = new ReportDocument();
                 report.Load(reportPath);
 
+                // Disable database refresh to avoid connection issues during metadata extraction
+                try
+                {
+                    report.SetDatabaseLogon("", "", "", "", false);
+                    Console.WriteLine("Disabled database refresh for metadata extraction");
+                }
+                catch (Exception dbEx)
+                {
+                    Console.WriteLine($"Warning: Could not disable database refresh: {dbEx.Message}");
+                }
+
                 var metadata = new ReportMetadata
                 {
                     Name = Path.GetFileNameWithoutExtension(reportPath),
@@ -54,6 +65,30 @@ namespace CrystalReportsService.Services
                 var report = new ReportDocument();
                 report.Load(reportPath);
 
+                // Disable database refresh to avoid connection issues
+                Console.WriteLine("Disabling database refresh...");
+                report.SetDatabaseLogon("", "", "", "", false);
+                
+                // Set data source location to avoid database issues
+                foreach (Table table in report.Database.Tables)
+                {
+                    try
+                    {
+                        var tableLogonInfo = table.LogOnInfo;
+                        tableLogonInfo.ConnectionInfo.ServerName = "";
+                        tableLogonInfo.ConnectionInfo.DatabaseName = "";
+                        tableLogonInfo.ConnectionInfo.UserID = "";
+                        tableLogonInfo.ConnectionInfo.Password = "";
+                        table.ApplyLogOnInfo(tableLogonInfo);
+                        Console.WriteLine($"Applied logon info for table: {table.Name}");
+                    }
+                    catch (Exception tableEx)
+                    {
+                        Console.WriteLine($"Warning: Could not set logon for table {table.Name}: {tableEx.Message}");
+                        // Continue with other tables
+                    }
+                }
+
                 byte[] result;
 
                 if (format.ToUpper() == "PDF")
@@ -77,6 +112,7 @@ namespace CrystalReportsService.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error generating preview: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 throw;
             }
         }
