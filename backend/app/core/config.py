@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     FALLBACK_MODEL: str = Field(default="anthropic/claude-3-haiku", env="FALLBACK_MODEL")
     LARGE_CONTEXT_MODEL: str = Field(default="mistral/mistral-large", env="LARGE_CONTEXT_MODEL")
     
-    # Database
+    # Database (optional when using Supabase REST API)
     DATABASE_URL: str = Field(env="DATABASE_URL", default="sqlite:///./crystal_copilot.db")
     
     # Supabase Configuration

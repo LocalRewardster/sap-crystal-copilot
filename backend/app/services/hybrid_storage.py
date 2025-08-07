@@ -36,8 +36,13 @@ class HybridStorageService:
             self.sqlite_service = StorageService()
             logger.info("Using SQLite as primary storage")
         except Exception as e:
-            logger.error("Failed to initialize any storage service", error=str(e))
-            raise RuntimeError("No storage service available")
+            logger.error("Failed to initialize SQLite storage service", error=str(e))
+            # If we can't initialize either service, we need to handle this gracefully
+            if not self.supabase_service:
+                logger.error("No storage service available - both Supabase and SQLite failed")
+                raise RuntimeError("No storage service available")
+            else:
+                logger.warning("SQLite unavailable but Supabase is working")
     
     @property
     def active_service(self):

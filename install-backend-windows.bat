@@ -9,7 +9,8 @@ python -m pip install --upgrade pip
 
 echo.
 echo Step 2: Installing Windows-compatible requirements...
-pip install -r requirements-windows.txt
+echo Trying simple installation first (no compilation needed)...
+pip install -r requirements-windows-simple.txt
 
 echo.
 echo Step 3: Testing Supabase connection...
