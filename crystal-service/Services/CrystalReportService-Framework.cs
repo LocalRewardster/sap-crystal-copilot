@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using CrystalDecisions.CrystalReports.Engine;
 using CrystalDecisions.Shared;
-using CrystalDecisions.ReportSource;
 using CrystalReportsService.Models;
 
 namespace CrystalReportsService.Services
@@ -120,42 +119,65 @@ namespace CrystalReportsService.Services
 
                 byte[] result;
 
-                // Create export options with database refresh disabled
-                var exportOptions = new ExportOptions();
-                var pdfFormatOptions = new PdfFormatOptions();
-                
-                // Set export format
-                exportOptions.ExportFormatType = ExportFormatType.PortableDocFormat;
-                exportOptions.ExportFormatOptions = pdfFormatOptions;
-                
-                // Critical: Disable database refresh during export
-                exportOptions.ExportDestinationType = ExportDestinationType.NoDestination;
-                
-                Console.WriteLine("Starting export with database refresh disabled...");
+                Console.WriteLine("Starting export with enhanced database handling...");
                 
                 try
                 {
-                    // Use ExportOptions to have more control over the export process
-                    var stream = report.ExportToStream(exportOptions);
+                    // Method 1: Try to set report to not refresh data
+                    try
+                    {
+                        // Disable data refresh at the report level
+                        report.DataSourceConnections.Clear();
+                        Console.WriteLine("Cleared data source connections");
+                    }
+                    catch (Exception clearEx)
+                    {
+                        Console.WriteLine($"Could not clear data connections: {clearEx.Message}");
+                    }
+                    
+                    // Try the export with all our database handling
+                    var stream = report.ExportToStream(ExportFormatType.PortableDocFormat);
                     result = ((MemoryStream)stream).ToArray();
                     Console.WriteLine($"✅ Export successful: {result.Length} bytes generated");
                 }
                 catch (Exception exportEx)
                 {
-                    Console.WriteLine($"❌ Export with options failed: {exportEx.Message}");
-                    Console.WriteLine("Attempting fallback export method...");
+                    Console.WriteLine($"❌ Enhanced export failed: {exportEx.Message}");
                     
-                    // Fallback: Try the original method as last resort
+                    // Method 2: Try to create a copy of the report without data
+                    Console.WriteLine("Attempting to create data-free report copy...");
                     try
                     {
-                        var stream = report.ExportToStream(ExportFormatType.PortableDocFormat);
+                        // Load a fresh copy and try more aggressive data disconnection
+                        var reportCopy = new ReportDocument();
+                        reportCopy.Load(reportPath);
+                        
+                        // More aggressive database disconnection
+                        foreach (Table table in reportCopy.Database.Tables)
+                        {
+                            try
+                            {
+                                table.LogOnInfo.ConnectionInfo.ServerName = "localhost";
+                                table.LogOnInfo.ConnectionInfo.DatabaseName = "dummy";
+                                table.LogOnInfo.ConnectionInfo.UserID = "";
+                                table.LogOnInfo.ConnectionInfo.Password = "";
+                                table.ApplyLogOnInfo(table.LogOnInfo);
+                            }
+                            catch { /* ignore */ }
+                        }
+                        
+                        var stream = reportCopy.ExportToStream(ExportFormatType.PortableDocFormat);
                         result = ((MemoryStream)stream).ToArray();
-                        Console.WriteLine($"⚠️ Fallback export worked: {result.Length} bytes");
+                        
+                        reportCopy.Close();
+                        reportCopy.Dispose();
+                        
+                        Console.WriteLine($"✅ Data-free copy export successful: {result.Length} bytes");
                     }
-                    catch (Exception fallbackEx)
+                    catch (Exception copyEx)
                     {
-                        Console.WriteLine($"❌ Both export methods failed. Original: {exportEx.Message}, Fallback: {fallbackEx.Message}");
-                        throw new Exception($"Export failed: {exportEx.Message}");
+                        Console.WriteLine($"❌ Data-free copy also failed: {copyEx.Message}");
+                        throw new Exception($"All export methods failed. Primary: {exportEx.Message}, Copy: {copyEx.Message}");
                     }
                 }
 
