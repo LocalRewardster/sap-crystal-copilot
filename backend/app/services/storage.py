@@ -172,7 +172,7 @@ class StorageService:
             with sqlite3.connect(self.db_path) as conn:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.execute("""
-                    SELECT id, filename, file_size, status, error_message, 
+                    SELECT id, filename, file_path, file_size, status, error_message, 
                            created_at, updated_at
                     FROM reports WHERE id = ?
                 """, (report_id,))
@@ -184,6 +184,7 @@ class StorageService:
                 return {
                     "report_id": row['id'],
                     "filename": row['filename'],
+                    "file_path": row['file_path'],
                     "file_size": row['file_size'],
                     "status": row['status'],
                     "error_message": row['error_message'],
