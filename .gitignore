@@ -73,10 +73,11 @@ frontend/.env.production.local
 ehthumbs.db
 Thumbs.db
 
-# Uploads and data
-uploads/
+# Uploads and data (allow sample reports for development)
+uploads/*.tmp
 data/
-*.rpt
+# Allow .rpt files for development/testing
+# *.rpt
 
 # Docker
 .dockerignore
