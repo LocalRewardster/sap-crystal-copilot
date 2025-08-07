@@ -24,18 +24,18 @@ class CrystalBridgeService:
     def __init__(self):
         self.crystal_service_url = getattr(settings, 'CRYSTAL_SERVICE_URL', 'http://localhost:5001')
         self.timeout = 30.0  # 30 second timeout for Crystal operations
+    
+    def _prepare_report_path(self, report_path: Path) -> str:
+        """Prepare report path for Crystal Reports service."""
+        abs_path = report_path.resolve()
+        if not abs_path.exists():
+            raise FileNotFoundError(f"Report file not found: {abs_path}")
+        return str(abs_path)
         
     async def generate_preview(self, report_path: Path, format: str = "PDF", parameters: Optional[Dict] = None) -> bytes:
         """Generate a preview of the Crystal Report using the C# service."""
         try:
-            # Convert to absolute path and ensure it exists
-            abs_path = report_path.resolve()
-            if not abs_path.exists():
-                raise FileNotFoundError(f"Report file not found: {abs_path}")
-            
-            # Convert to Windows-compatible path string
-            path_str = str(abs_path).replace('/', '\\')
-            
+            path_str = self._prepare_report_path(report_path)
             logger.info("Generating Crystal Report preview", report_path=path_str, format=format)
             
             async with httpx.AsyncClient(timeout=self.timeout) as client:
@@ -71,14 +71,7 @@ class CrystalBridgeService:
     async def extract_metadata(self, report_path: Path) -> ReportMetadata:
         """Extract comprehensive metadata from Crystal Report using C# service."""
         try:
-            # Convert to absolute path and ensure it exists
-            abs_path = report_path.resolve()
-            if not abs_path.exists():
-                raise FileNotFoundError(f"Report file not found: {abs_path}")
-            
-            # Convert to Windows-compatible path string
-            path_str = str(abs_path).replace('/', '\\')
-            
+            path_str = self._prepare_report_path(report_path)
             logger.info("Extracting Crystal Report metadata", report_path=path_str)
             
             async with httpx.AsyncClient(timeout=self.timeout) as client:
@@ -120,14 +113,7 @@ class CrystalBridgeService:
     async def modify_field(self, report_path: Path, field_name: str, operation: str, parameters: Optional[Dict] = None) -> bool:
         """Perform field operations using Crystal Reports C# service."""
         try:
-            # Convert to absolute path and ensure it exists
-            abs_path = report_path.resolve()
-            if not abs_path.exists():
-                raise FileNotFoundError(f"Report file not found: {abs_path}")
-            
-            # Convert to Windows-compatible path string
-            path_str = str(abs_path).replace('/', '\\')
-            
+            path_str = self._prepare_report_path(report_path)
             logger.info("Performing Crystal Report field operation", 
                        report_path=path_str, 
                        field_name=field_name, 
@@ -187,14 +173,12 @@ class CrystalBridgeService:
     async def validate_report(self, report_path: Path) -> bool:
         """Validate if Crystal Report is accessible using C# service."""
         try:
-            # Convert to absolute path and ensure it exists
+            # Check if file exists first
             abs_path = report_path.resolve()
             if not abs_path.exists():
                 return False
             
-            # Convert to Windows-compatible path string
-            path_str = str(abs_path).replace('/', '\\')
-            
+            path_str = str(abs_path)
             logger.info("Validating Crystal Report", report_path=path_str)
             
             async with httpx.AsyncClient(timeout=self.timeout) as client:
@@ -227,14 +211,7 @@ class CrystalBridgeService:
     async def export_report(self, report_path: Path, format: str, parameters: Optional[Dict] = None) -> bytes:
         """Export Crystal Report to various formats."""
         try:
-            # Convert to absolute path and ensure it exists
-            abs_path = report_path.resolve()
-            if not abs_path.exists():
-                raise FileNotFoundError(f"Report file not found: {abs_path}")
-            
-            # Convert to Windows-compatible path string
-            path_str = str(abs_path).replace('/', '\\')
-            
+            path_str = self._prepare_report_path(report_path)
             logger.info("Exporting Crystal Report", report_path=path_str, format=format)
             
             async with httpx.AsyncClient(timeout=self.timeout) as client:
