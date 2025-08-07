@@ -67,26 +67,54 @@ namespace CrystalReportsService.Services
 
                 // Disable database refresh to avoid connection issues
                 Console.WriteLine("Disabling database refresh...");
-                report.SetDatabaseLogon("", "", "", "", false);
+                
+                // Multiple approaches to disable database connections
+                try
+                {
+                    report.SetDatabaseLogon("", "", "", "", false);
+                    Console.WriteLine("SetDatabaseLogon completed");
+                }
+                catch (Exception dbEx)
+                {
+                    Console.WriteLine($"Warning: SetDatabaseLogon failed: {dbEx.Message}");
+                }
                 
                 // Set data source location to avoid database issues
+                Console.WriteLine($"Processing {report.Database.Tables.Count} tables...");
                 foreach (Table table in report.Database.Tables)
                 {
                     try
                     {
+                        Console.WriteLine($"Processing table: {table.Name}");
                         var tableLogonInfo = table.LogOnInfo;
                         tableLogonInfo.ConnectionInfo.ServerName = "";
                         tableLogonInfo.ConnectionInfo.DatabaseName = "";
                         tableLogonInfo.ConnectionInfo.UserID = "";
                         tableLogonInfo.ConnectionInfo.Password = "";
+                        tableLogonInfo.ConnectionInfo.IntegratedSecurity = false;
                         table.ApplyLogOnInfo(tableLogonInfo);
-                        Console.WriteLine($"Applied logon info for table: {table.Name}");
+                        
+                        // Also try to set the location to nothing
+                        table.Location = "";
+                        
+                        Console.WriteLine($"✅ Applied logon info for table: {table.Name}");
                     }
                     catch (Exception tableEx)
                     {
-                        Console.WriteLine($"Warning: Could not set logon for table {table.Name}: {tableEx.Message}");
+                        Console.WriteLine($"⚠️ Warning: Could not set logon for table {table.Name}: {tableEx.Message}");
                         // Continue with other tables
                     }
+                }
+                
+                // Try to verify data sources
+                try
+                {
+                    report.VerifyDatabase();
+                    Console.WriteLine("Database verification completed");
+                }
+                catch (Exception verifyEx)
+                {
+                    Console.WriteLine($"Database verification failed (expected): {verifyEx.Message}");
                 }
 
                 byte[] result;
