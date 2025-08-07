@@ -112,6 +112,66 @@ async def get_report_status(report_id: str):
     
     return reports_storage[report_id]
 
+@app.get("/api/v1/reports/{report_id}/metadata")
+async def get_report_metadata(report_id: str):
+    """Get report metadata."""
+    if report_id not in reports_storage:
+        raise HTTPException(status_code=404, detail="Report not found")
+    
+    # Return mock metadata for now
+    report = reports_storage[report_id]
+    return {
+        "id": report_id,
+        "filename": report["filename"],
+        "title": report["filename"].replace('.rpt', ''),
+        "description": "Crystal Report processed via minimal backend",
+        "author": "Unknown",
+        "file_size": report["file_size"],
+        "status": "ready",
+        "parsed_at": report["created_at"],
+        "sections": [
+            {
+                "section_type": "REPORT_HEADER",
+                "name": "Report Header",
+                "height": 100,
+                "fields": [
+                    {
+                        "id": "title_field",
+                        "name": "Report Title",
+                        "field_type": "STRING",
+                        "section": "REPORT_HEADER",
+                        "x": 10,
+                        "y": 10,
+                        "width": 200,
+                        "height": 20,
+                        "visible": True
+                    }
+                ]
+            },
+            {
+                "section_type": "DETAILS",
+                "name": "Details",
+                "height": 200,
+                "fields": [
+                    {
+                        "id": "sample_field",
+                        "name": "Sample Data Field",
+                        "field_type": "STRING",
+                        "section": "DETAILS",
+                        "x": 10,
+                        "y": 10,
+                        "width": 150,
+                        "height": 20,
+                        "visible": True
+                    }
+                ]
+            }
+        ],
+        "tables": ["SampleTable"],
+        "database_connections": [],
+        "parameters": []
+    }
+
 @app.post("/api/v1/chat")
 async def chat_with_ai(request: dict):
     """Simple chat endpoint (mock response for testing)."""
@@ -128,7 +188,34 @@ async def crystal_service_health():
         "service": "Crystal Reports SDK Service",
         "status": "not_configured",
         "available": False,
-        "message": "Crystal Reports service not configured in minimal mode"
+        "message": "Crystal Reports service not configured in minimal mode. Upload works, but advanced features require full setup."
+    }
+
+@app.post("/api/v1/crystal/{report_id}/preview")
+async def generate_crystal_preview(report_id: str):
+    """Mock Crystal Reports preview generation."""
+    if report_id not in reports_storage:
+        raise HTTPException(status_code=404, detail="Report not found")
+    
+    return {
+        "message": "Crystal Reports preview not available in minimal mode",
+        "report_id": report_id,
+        "status": "not_configured",
+        "note": "To enable Crystal Reports previews, set up the full backend with Crystal Reports SDK"
+    }
+
+@app.post("/api/v1/reports/{report_id}/field-operations")
+async def perform_field_operation(report_id: str, request: dict):
+    """Mock field operations."""
+    if report_id not in reports_storage:
+        raise HTTPException(status_code=404, detail="Report not found")
+    
+    return {
+        "success": False,
+        "message": "Field operations not available in minimal mode",
+        "report_id": report_id,
+        "operation": request.get("operation", "unknown"),
+        "note": "To enable field operations, set up the full backend with Crystal Reports SDK"
     }
 
 # Test Supabase connection
