@@ -5,8 +5,15 @@ Handles database operations using Supabase PostgreSQL.
 
 from typing import Dict, List, Optional, Any
 from datetime import datetime
-from supabase import create_client, Client
 import json
+
+try:
+    from supabase import create_client, Client
+    SUPABASE_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: Supabase not available - {e}")
+    SUPABASE_AVAILABLE = False
+    Client = None
 
 from app.core.config import get_settings
 from app.core.logging import get_logger
@@ -20,16 +27,25 @@ class SupabaseService:
     """Service for Supabase database operations."""
     
     def __init__(self):
+        if not SUPABASE_AVAILABLE:
+            logger.warning("Supabase library not installed - falling back to SQLite")
+            self.client = None
+            return
+            
         if not settings.SUPABASE_URL or not settings.SUPABASE_SERVICE_KEY:
             logger.warning("Supabase configuration missing - falling back to SQLite")
             self.client = None
             return
             
-        self.client: Client = create_client(
-            settings.SUPABASE_URL,
-            settings.SUPABASE_SERVICE_KEY
-        )
-        logger.info("Supabase client initialized")
+        try:
+            self.client: Client = create_client(
+                settings.SUPABASE_URL,
+                settings.SUPABASE_SERVICE_KEY
+            )
+            logger.info("Supabase client initialized")
+        except Exception as e:
+            logger.error("Failed to initialize Supabase client", error=str(e))
+            self.client = None
     
     def is_available(self) -> bool:
         """Check if Supabase is configured and available."""
