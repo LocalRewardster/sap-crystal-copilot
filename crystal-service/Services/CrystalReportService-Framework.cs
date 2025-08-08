@@ -29,6 +29,17 @@ namespace CrystalReportsService.Services
                         {
                             t.SetDataSource(ds.Tables[alias]);
                             Console.WriteLine($"    ✅ SetDataSource for {alias}");
+                            
+                            // CRITICAL: Ensure table location matches for formula resolution
+                            try
+                            {
+                                t.Location = alias; // Set location to match table name
+                                Console.WriteLine($"    ✅ Set table location to: {alias}");
+                            }
+                            catch (Exception locEx)
+                            {
+                                Console.WriteLine($"    ⚠️ Could not set table location: {locEx.Message}");
+                            }
                         }
                         
                         // Triple-sure connection clearing
@@ -73,10 +84,22 @@ namespace CrystalReportsService.Services
                     if (ds.Tables.Contains(link.SourceTable.Name))
                     {
                         link.SourceTable.SetDataSource(ds.Tables[link.SourceTable.Name]);
+                        try
+                        {
+                            link.SourceTable.Location = link.SourceTable.Name;
+                            Console.WriteLine($"    ✅ Set source table location: {link.SourceTable.Name}");
+                        }
+                        catch { }
                     }
                     if (ds.Tables.Contains(link.DestinationTable.Name))
                     {
                         link.DestinationTable.SetDataSource(ds.Tables[link.DestinationTable.Name]);
+                        try
+                        {
+                            link.DestinationTable.Location = link.DestinationTable.Name;
+                            Console.WriteLine($"    ✅ Set destination table location: {link.DestinationTable.Name}");
+                        }
+                        catch { }
                     }
                     Console.WriteLine($"    ✅ Updated link tables");
                 }
