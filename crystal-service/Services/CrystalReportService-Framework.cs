@@ -91,7 +91,68 @@ namespace CrystalReportsService.Services
             Console.WriteLine("  ⚠️ VerifyOnEveryPrint property not available in this SDK version");
             Console.WriteLine("  💡 Relying on cleared connection info to prevent verification");
 
+            // 6. Handle report parameters
+            Console.WriteLine("6️⃣ Processing report parameters...");
+            try
+            {
+                if (rpt.ParameterFields.Count > 0)
+                {
+                    Console.WriteLine($"  Found {rpt.ParameterFields.Count} parameters");
+                    foreach (ParameterField param in rpt.ParameterFields)
+                    {
+                        try
+                        {
+                            Console.WriteLine($"    Processing parameter: {param.Name} (Type: {param.ValueType})");
+                            
+                            // Set default values based on parameter type
+                            var defaultValue = GetDefaultParameterValue(param.ValueType);
+                            param.DefaultValue = defaultValue;
+                            param.HasCurrentValue = true;
+                            param.CurrentValues.Clear();
+                            param.CurrentValues.AddValue(defaultValue);
+                            
+                            Console.WriteLine($"      ✅ Set default value: {defaultValue}");
+                        }
+                        catch (Exception paramEx)
+                        {
+                            Console.WriteLine($"      ⚠️ Could not set parameter {param.Name}: {paramEx.Message}");
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("  No parameters found");
+                }
+            }
+            catch (Exception paramEx)
+            {
+                Console.WriteLine($"⚠️ Parameter processing failed: {paramEx.Message}");
+            }
+            
             Console.WriteLine("🎯 Force offline procedure completed!");
+        }
+        
+        private object GetDefaultParameterValue(FieldValueType valueType)
+        {
+            switch (valueType)
+            {
+                case FieldValueType.StringField:
+                    return "PREVIEW";
+                case FieldValueType.NumberField:
+                    return 1;
+                case FieldValueType.CurrencyField:
+                    return 0.00m;
+                case FieldValueType.BooleanField:
+                    return false;
+                case FieldValueType.DateField:
+                    return DateTime.Now;
+                case FieldValueType.TimeField:
+                    return DateTime.Now;
+                case FieldValueType.DateTimeField:
+                    return DateTime.Now;
+                default:
+                    return "DEFAULT";
+            }
         }
 
         public ReportMetadata ExtractMetadata(string reportPath)
