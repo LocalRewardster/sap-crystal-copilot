@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using CrystalDecisions.CrystalReports.Engine;
 using CrystalDecisions.Shared;
@@ -68,134 +69,111 @@ namespace CrystalReportsService.Services
                 Console.WriteLine("🔧 Configuring report for offline mode...");
                 Console.WriteLine("Report document created, ready for loading...");
 
-                Console.WriteLine("📂 Loading report with database bypass...");
+                Console.WriteLine("📂 Loading report with DataSet injection approach...");
                 
-                // Try multiple loading approaches
-                bool reportLoaded = false;
-                Exception lastLoadException = null;
-                
-                // Method 1: Standard report load
                 try
                 {
-                    Console.WriteLine("Attempting standard report load...");
-                    report.Load(reportPath);
-                    reportLoaded = true;
-                    Console.WriteLine("✅ Report loaded successfully");
+                    Console.WriteLine("🎯 Loading report by temp copy to avoid file locks...");
+                    report.Load(reportPath, OpenReportMethod.OpenReportByTempCopy);
+                    Console.WriteLine("✅ Report loaded successfully with temp copy method");
                 }
                 catch (Exception loadEx)
                 {
-                    Console.WriteLine($"❌ Standard load failed: {loadEx.Message}");
-                    lastLoadException = loadEx;
-                    
-                    // Method 2: Try loading with different report document
-                    try
-                    {
-                        Console.WriteLine("🔄 Attempting fresh report load...");
-                        report.Dispose();
-                        report = new ReportDocument();
-                        
-                        Console.WriteLine("Fresh report document created");
-                        report.Load(reportPath);
-                        reportLoaded = true;
-                        Console.WriteLine("✅ Fresh report load successful");
-                    }
-                    catch (Exception freshEx)
-                    {
-                        Console.WriteLine($"❌ Fresh load also failed: {freshEx.Message}");
-                        lastLoadException = freshEx;
-                        
-                        // Method 3: Try with immediate database logon clearing
-                        try
-                        {
-                            Console.WriteLine("🎯 Attempting load with immediate database bypass...");
-                            report.Dispose();
-                            report = new ReportDocument();
-                            
-                            // Load first, then immediately try to clear database
-                            report.Load(reportPath);
-                            
-                            // Immediately try to disable database after load
-                            try
-                            {
-                                report.SetDatabaseLogon("", "", "", "", false);
-                                Console.WriteLine("Applied immediate database logon clearing");
-                            }
-                            catch { /* ignore */ }
-                            
-                            reportLoaded = true;
-                            Console.WriteLine("✅ Load with immediate bypass successful");
-                        }
-                        catch (Exception bypassEx)
-                        {
-                            Console.WriteLine($"❌ Immediate bypass also failed: {bypassEx.Message}");
-                            lastLoadException = bypassEx;
-                        }
-                    }
-                }
-                
-                if (!reportLoaded)
-                {
-                    throw new Exception($"Could not load report: {lastLoadException?.Message}");
+                    Console.WriteLine($"❌ Temp copy load failed, trying standard load: {loadEx.Message}");
+                    report.Load(reportPath);
+                    Console.WriteLine("✅ Report loaded successfully with standard method");
                 }
 
-                // Disable database refresh to avoid connection issues
-                Console.WriteLine("Disabling database refresh...");
-                
-                // Multiple approaches to disable database connections
-                try
-                {
-                    report.SetDatabaseLogon("", "", "", "", false);
-                    Console.WriteLine("SetDatabaseLogon completed");
-                }
-                catch (Exception dbEx)
-                {
-                    Console.WriteLine($"Warning: SetDatabaseLogon failed: {dbEx.Message}");
-                }
-                
-                // NUCLEAR OPTION: Replace database with dummy data source
-                Console.WriteLine($"🎯 NUCLEAR OPTION: Replacing database connections (found {report.Database.Tables.Count} tables)");
+                // DATASET INJECTION APPROACH: Replace database with in-memory DataSet
+                Console.WriteLine($"🎯 DATASET INJECTION: Creating dummy DataSet for {report.Database.Tables.Count} tables");
                 
                 try 
                 {
-                    // Create a dummy database connection that doesn't require validation
+                    // Create a DataSet that matches the schema Crystal Reports expects
+                    var dataSet = new DataSet();
+                    
                     foreach (Table table in report.Database.Tables)
                     {
                         try
                         {
-                            Console.WriteLine($"Replacing connection for table: {table.Name}");
+                            Console.WriteLine($"Creating DataTable for: {table.Name}");
                             
-                            // Method: Set table to use a local dummy connection
-                            var connectionInfo = table.LogOnInfo.ConnectionInfo;
-                            connectionInfo.Type = ConnectionInfoType.SQL;
-                            connectionInfo.ServerName = "."; // Local server
-                            connectionInfo.DatabaseName = "master"; // System database that always exists
-                            connectionInfo.UserID = "";
-                            connectionInfo.Password = "";
-                            connectionInfo.IntegratedSecurity = true; // Use Windows auth
+                            // Create DataTable with the exact name Crystal expects
+                            var dataTable = new DataTable(table.Location); // Use the table location as DataTable name
                             
-                            table.ApplyLogOnInfo(table.LogOnInfo);
+                            // Add basic columns that most reports expect
+                            // We'll add common field types - Crystal Reports will ignore unused ones
+                            dataTable.Columns.Add("ID", typeof(int));
+                            dataTable.Columns.Add("Name", typeof(string));
+                            dataTable.Columns.Add("Description", typeof(string));
+                            dataTable.Columns.Add("Amount", typeof(decimal));
+                            dataTable.Columns.Add("Date", typeof(DateTime));
+                            dataTable.Columns.Add("Code", typeof(string));
+                            dataTable.Columns.Add("Status", typeof(string));
+                            dataTable.Columns.Add("Type", typeof(string));
+                            dataTable.Columns.Add("Value", typeof(string));
+                            dataTable.Columns.Add("Reference", typeof(string));
                             
-                            // Set table location to system table that exists
-                            table.Location = "sys.objects"; // System table that always exists in SQL Server
+                            // Add one empty row to satisfy Crystal Reports
+                            var row = dataTable.NewRow();
+                            row["ID"] = 1;
+                            row["Name"] = "Sample Data";
+                            row["Description"] = "Preview Mode";
+                            row["Amount"] = 0.00m;
+                            row["Date"] = DateTime.Now;
+                            row["Code"] = "PREV";
+                            row["Status"] = "Active";
+                            row["Type"] = "Preview";
+                            row["Value"] = "N/A";
+                            row["Reference"] = "PREVIEW";
+                            dataTable.Rows.Add(row);
                             
-                            Console.WriteLine($"✅ Replaced connection for {table.Name}");
+                            dataSet.Tables.Add(dataTable);
+                            Console.WriteLine($"✅ Created DataTable for {table.Name} with {dataTable.Columns.Count} columns");
                         }
                         catch (Exception tableEx)
                         {
-                            Console.WriteLine($"⚠️ Could not replace connection for {table.Name}: {tableEx.Message}");
+                            Console.WriteLine($"⚠️ Could not create DataTable for {table.Name}: {tableEx.Message}");
                         }
                     }
                     
-                    Console.WriteLine("🎯 Database replacement completed - attempting export...");
+                    Console.WriteLine($"🎯 DataSet created with {dataSet.Tables.Count} tables");
+                    
+                    // Inject the DataSet into Crystal Reports
+                    Console.WriteLine("💉 Injecting DataSet into Crystal Reports...");
+                    report.SetDataSource(dataSet);
+                    Console.WriteLine("✅ DataSet injection completed");
+                    
+                    // Disable server verification
+                    try
+                    {
+                        if (report.DataSourceConnections.Count > 0)
+                        {
+                            report.DataSourceConnections[0].VerifyServerOnLogin = false;
+                            Console.WriteLine("✅ Disabled VerifyServerOnLogin");
+                        }
+                    }
+                    catch (Exception verifyEx)
+                    {
+                        Console.WriteLine($"⚠️ Could not disable VerifyServerOnLogin: {verifyEx.Message}");
+                    }
+                    
+                    // Verify database against the DataSet (should work now)
+                    try
+                    {
+                        report.VerifyDatabase();
+                        Console.WriteLine("✅ Database verification successful with DataSet");
+                    }
+                    catch (Exception verifyEx)
+                    {
+                        Console.WriteLine($"⚠️ Database verification failed: {verifyEx.Message}");
+                    }
                 }
-                catch (Exception replaceEx)
+                catch (Exception datasetEx)
                 {
-                    Console.WriteLine($"⚠️ Database replacement failed: {replaceEx.Message}");
-                    Console.WriteLine("Proceeding with original connections...");
+                    Console.WriteLine($"❌ DataSet injection failed: {datasetEx.Message}");
+                    Console.WriteLine("Proceeding without DataSet injection...");
                 }
-                
-                // Skip database verification entirely
-                Console.WriteLine("⚡ Skipping database verification - going straight to export");
 
                 byte[] result;
 
