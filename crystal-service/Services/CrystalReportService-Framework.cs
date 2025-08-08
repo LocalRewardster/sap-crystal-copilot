@@ -25,23 +25,7 @@ namespace CrystalReportsService.Services
                         var alias = t.Name;
                         Console.WriteLine($"  Processing table: {alias}");
                         
-                        if (ds.Tables.Contains(alias))
-                        {
-                            t.SetDataSource(ds.Tables[alias]);
-                            Console.WriteLine($"    ✅ SetDataSource for {alias}");
-                            
-                            // CRITICAL: Ensure table location matches for formula resolution
-                            try
-                            {
-                                t.Location = alias; // Set location to match table name
-                                Console.WriteLine($"    ✅ Set table location to: {alias}");
-                            }
-                            catch (Exception locEx)
-                            {
-                                Console.WriteLine($"    ⚠️ Could not set table location: {locEx.Message}");
-                            }
-                        }
-                        
+                        // REORDER: Clear connection info FIRST, then set DataSource
                         // Triple-sure connection clearing
                         t.LogOnInfo.ConnectionInfo.ServerName = "";
                         t.LogOnInfo.ConnectionInfo.DatabaseName = "";
@@ -49,6 +33,16 @@ namespace CrystalReportsService.Services
                         t.LogOnInfo.ConnectionInfo.Password = "";
                         t.ApplyLogOnInfo(t.LogOnInfo);
                         Console.WriteLine($"    ✅ Cleared connection info for {alias}");
+                        
+                        if (ds.Tables.Contains(alias))
+                        {
+                            t.SetDataSource(ds.Tables[alias]);
+                            Console.WriteLine($"    ✅ SetDataSource for {alias}");
+                            
+                            // Skip table.Location setting - it triggers database connections
+                            // DataSource should be sufficient for field resolution
+                            Console.WriteLine($"    💡 Skipping table.Location to avoid database connection triggers");
+                        }
                     }
                     catch (Exception tableEx)
                     {
@@ -84,22 +78,12 @@ namespace CrystalReportsService.Services
                     if (ds.Tables.Contains(link.SourceTable.Name))
                     {
                         link.SourceTable.SetDataSource(ds.Tables[link.SourceTable.Name]);
-                        try
-                        {
-                            link.SourceTable.Location = link.SourceTable.Name;
-                            Console.WriteLine($"    ✅ Set source table location: {link.SourceTable.Name}");
-                        }
-                        catch { }
+                        Console.WriteLine($"    ✅ Set source table DataSource: {link.SourceTable.Name}");
                     }
                     if (ds.Tables.Contains(link.DestinationTable.Name))
                     {
                         link.DestinationTable.SetDataSource(ds.Tables[link.DestinationTable.Name]);
-                        try
-                        {
-                            link.DestinationTable.Location = link.DestinationTable.Name;
-                            Console.WriteLine($"    ✅ Set destination table location: {link.DestinationTable.Name}");
-                        }
-                        catch { }
+                        Console.WriteLine($"    ✅ Set destination table DataSource: {link.DestinationTable.Name}");
                     }
                     Console.WriteLine($"    ✅ Updated link tables");
                 }
@@ -395,22 +379,34 @@ namespace CrystalReportsService.Services
                         Console.WriteLine($"    Columns: {string.Join(", ", columnNames)}");
                     }
                     
-                    // COMPREHENSIVE FORCE OFFLINE - Handle all connection types
-                    Console.WriteLine("🎯 FORCE OFFLINE: Comprehensive database disconnection...");
+                    // ALTERNATIVE APPROACH: Use report.SetDataSource() and disable verification
+                    Console.WriteLine("🎯 ALTERNATIVE: Using report-level DataSet injection...");
                     try
                     {
-                        ForceOffline(report, dataSet);
-                        Console.WriteLine("✅ Force offline completed - all connection handles cleared");
-                    }
-                    catch (Exception forceEx)
-                    {
-                        Console.WriteLine($"❌ Force offline failed: {forceEx.Message}");
-                        Console.WriteLine($"Stack trace: {forceEx.StackTrace}");
-                        Console.WriteLine("Proceeding with basic DataSet injection...");
-                        
-                        // Fallback to basic injection
+                        // Set the entire DataSet as the report's data source
                         report.SetDataSource(dataSet);
-                        Console.WriteLine("✅ Basic DataSet injection completed");
+                        Console.WriteLine("✅ Report-level DataSet injection completed");
+                        
+                        // Try to disable database refresh/verification
+                        try
+                        {
+                            report.VerifyDatabase();
+                            Console.WriteLine("✅ Database verification completed with DataSet");
+                        }
+                        catch (Exception verifyEx)
+                        {
+                            Console.WriteLine($"⚠️ Database verification failed (expected with DataSet): {verifyEx.Message}");
+                            Console.WriteLine("💡 Proceeding without verification - DataSet should work");
+                        }
+                    }
+                    catch (Exception dsEx)
+                    {
+                        Console.WriteLine($"❌ DataSet injection failed: {dsEx.Message}");
+                        Console.WriteLine("🔄 Trying comprehensive force offline approach...");
+                        
+                        // Fallback to force offline
+                        ForceOffline(report, dataSet);
+                        Console.WriteLine("✅ Force offline fallback completed");
                     }
                     
                     // Note: DataSet injection should bypass server verification automatically
