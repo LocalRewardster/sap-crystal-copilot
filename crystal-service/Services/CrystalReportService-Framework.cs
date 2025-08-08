@@ -4,8 +4,6 @@ using System.Data;
 using System.IO;
 using CrystalDecisions.CrystalReports.Engine;
 using CrystalDecisions.Shared;
-using CrystalDecisions.ReportAppServer.ClientDoc;
-using CrystalDecisions.ReportAppServer.DatabaseController;
 using CrystalReportsService.Models;
 
 namespace CrystalReportsService.Services
@@ -60,26 +58,9 @@ namespace CrystalReportsService.Services
                 wipeDatabase(sr.Database);
             }
 
-            // 3. Command tables via RAS API
+            // 3. Command tables (limited support without RAS API)
             Console.WriteLine("3️⃣ Processing command tables...");
-            try
-            {
-                var rc = rpt.ReportClientDocument;
-                foreach (var tab in rc.DatabaseController.Database.Tables)
-                {
-                    if (tab is ICommandTable cmd)
-                    {
-                        Console.WriteLine($"  Processing command table: {cmd.Name}");
-                        cmd.CommandText = "SELECT 1 AS Dummy";
-                        rc.DatabaseController.SetTableLocation(tab, cmd as ITable);
-                        Console.WriteLine($"    ✅ Updated command table {cmd.Name}");
-                    }
-                }
-            }
-            catch (Exception cmdEx)
-            {
-                Console.WriteLine($"⚠️ Command table processing failed: {cmdEx.Message}");
-            }
+            Console.WriteLine("  ⚠️ RAS API not available - skipping command table processing");
 
             // 4. Table links/aliases
             Console.WriteLine("4️⃣ Processing table links...");
@@ -112,9 +93,8 @@ namespace CrystalReportsService.Services
                 rpt.VerifyOnEveryPrint = false;
                 Console.WriteLine("  ✅ Set VerifyOnEveryPrint = false");
                 
-                var rc = rpt.ReportClientDocument;
-                rc.VerifyDatabase(false);
-                Console.WriteLine("  ✅ Called VerifyDatabase(false)");
+                // Note: ReportClientDocument.VerifyDatabase() not available in this SDK version
+                Console.WriteLine("  ⚠️ Advanced VerifyDatabase(false) not available - relying on VerifyOnEveryPrint = false");
             }
             catch (Exception verifyEx)
             {
