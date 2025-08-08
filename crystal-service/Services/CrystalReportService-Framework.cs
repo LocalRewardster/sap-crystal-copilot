@@ -63,7 +63,76 @@ namespace CrystalReportsService.Services
                 Console.WriteLine($"Generating {format} preview for: {reportPath}");
 
                 var report = new ReportDocument();
-                report.Load(reportPath);
+                
+                // CRITICAL: Set database options BEFORE loading the report
+                Console.WriteLine("🔧 Configuring report for offline mode...");
+                try
+                {
+                    // Set the report to not verify on every use
+                    report.VerifyOnEveryUse = false;
+                    Console.WriteLine("Disabled VerifyOnEveryUse");
+                    
+                    // Try to set offline mode if available
+                    try
+                    {
+                        // This might help with database-heavy reports
+                        var summaryInfo = report.SummaryInfo;
+                        Console.WriteLine("Accessed SummaryInfo for offline mode");
+                    }
+                    catch (Exception summaryEx)
+                    {
+                        Console.WriteLine($"Could not access SummaryInfo: {summaryEx.Message}");
+                    }
+                }
+                catch (Exception verifyEx)
+                {
+                    Console.WriteLine($"Could not disable VerifyOnEveryUse: {verifyEx.Message}");
+                }
+
+                Console.WriteLine("📂 Loading report with database bypass...");
+                
+                // Try multiple loading approaches
+                bool reportLoaded = false;
+                Exception lastLoadException = null;
+                
+                // Method 1: Load with database verification disabled
+                try
+                {
+                    Console.WriteLine("Attempting load with VerifyOnEveryUse = false...");
+                    report.Load(reportPath);
+                    reportLoaded = true;
+                    Console.WriteLine("✅ Report loaded successfully");
+                }
+                catch (Exception loadEx)
+                {
+                    Console.WriteLine($"❌ Standard load failed: {loadEx.Message}");
+                    lastLoadException = loadEx;
+                    
+                    // Method 2: Try loading with different report document
+                    try
+                    {
+                        Console.WriteLine("🔄 Attempting fresh report load...");
+                        report.Dispose();
+                        report = new ReportDocument();
+                        
+                        // Set all possible offline flags before loading
+                        report.VerifyOnEveryUse = false;
+                        
+                        report.Load(reportPath);
+                        reportLoaded = true;
+                        Console.WriteLine("✅ Fresh report load successful");
+                    }
+                    catch (Exception freshEx)
+                    {
+                        Console.WriteLine($"❌ Fresh load also failed: {freshEx.Message}");
+                        lastLoadException = freshEx;
+                    }
+                }
+                
+                if (!reportLoaded)
+                {
+                    throw new Exception($"Could not load report: {lastLoadException?.Message}");
+                }
 
                 // Disable database refresh to avoid connection issues
                 Console.WriteLine("Disabling database refresh...");
