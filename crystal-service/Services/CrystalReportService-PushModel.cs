@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Threading.Tasks;
 using CrystalDecisions.CrystalReports.Engine;
 using CrystalDecisions.Shared;
 using CrystalReportsService.Models;
@@ -55,7 +56,7 @@ namespace CrystalReportsService.Services
                 Console.WriteLine($"✅ PUSH MODEL SUCCESS: Generated {bytes.Length} bytes");
                 
                 report.Dispose();
-                return bytes;
+                return await Task.FromResult(bytes);
             }
             catch (Exception ex)
             {
