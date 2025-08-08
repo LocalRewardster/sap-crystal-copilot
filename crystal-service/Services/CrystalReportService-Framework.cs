@@ -135,61 +135,51 @@ namespace CrystalReportsService.Services
                 
                 try
                 {
-                    // Method 1: Try to set report to not refresh data
-                    try
-                    {
-                        // Disable data refresh at the report level
-                        report.DataSourceConnections.Clear();
-                        Console.WriteLine("Cleared data source connections");
-                    }
-                    catch (Exception clearEx)
-                    {
-                        Console.WriteLine($"Could not clear data connections: {clearEx.Message}");
-                    }
-                    
-                    // Try the export with all our database handling
+                    // Method 1: Try direct export without touching database at all
+                    Console.WriteLine("🚀 Attempting direct export without database validation...");
                     var stream = report.ExportToStream(ExportFormatType.PortableDocFormat);
                     result = ((MemoryStream)stream).ToArray();
-                    Console.WriteLine($"✅ Export successful: {result.Length} bytes generated");
+                    Console.WriteLine($"✅ Direct export successful: {result.Length} bytes");
                 }
                 catch (Exception exportEx)
                 {
-                    Console.WriteLine($"❌ Enhanced export failed: {exportEx.Message}");
+                    Console.WriteLine($"❌ Direct export failed: {exportEx.Message}");
                     
-                    // Method 2: Try to create a copy of the report without data
-                    Console.WriteLine("Attempting to create data-free report copy...");
+                    // Method 2: Try disk export (sometimes works when stream doesn't)
+                    Console.WriteLine("🔧 Attempting disk export method...");
                     try
                     {
-                        // Load a fresh copy and try more aggressive data disconnection
-                        var reportCopy = new ReportDocument();
-                        reportCopy.Load(reportPath);
+                        string tempPath = Path.GetTempFileName() + ".pdf";
                         
-                        // More aggressive database disconnection
-                        foreach (Table table in reportCopy.Database.Tables)
-                        {
-                            try
-                            {
-                                table.LogOnInfo.ConnectionInfo.ServerName = "localhost";
-                                table.LogOnInfo.ConnectionInfo.DatabaseName = "dummy";
-                                table.LogOnInfo.ConnectionInfo.UserID = "";
-                                table.LogOnInfo.ConnectionInfo.Password = "";
-                                table.ApplyLogOnInfo(table.LogOnInfo);
-                            }
-                            catch { /* ignore */ }
-                        }
+                        var exportOptions = report.ExportOptions;
+                        exportOptions.ExportFormatType = ExportFormatType.PortableDocFormat;
+                        exportOptions.ExportDestinationType = ExportDestinationType.DiskFile;
+                        exportOptions.DestinationOptions = new DiskFileDestinationOptions { DiskFileName = tempPath };
                         
-                        var stream = reportCopy.ExportToStream(ExportFormatType.PortableDocFormat);
-                        result = ((MemoryStream)stream).ToArray();
+                        report.Export();
+                        result = File.ReadAllBytes(tempPath);
+                        File.Delete(tempPath);
                         
-                        reportCopy.Close();
-                        reportCopy.Dispose();
-                        
-                        Console.WriteLine($"✅ Data-free copy export successful: {result.Length} bytes");
+                        Console.WriteLine($"✅ Disk export successful: {result.Length} bytes");
                     }
-                    catch (Exception copyEx)
+                    catch (Exception diskEx)
                     {
-                        Console.WriteLine($"❌ Data-free copy also failed: {copyEx.Message}");
-                        throw new Exception($"All export methods failed. Primary: {exportEx.Message}, Copy: {copyEx.Message}");
+                        Console.WriteLine($"❌ Disk export failed: {diskEx.Message}");
+                        
+                        // Method 3: Try structure-only export (no data)
+                        Console.WriteLine("🎯 Attempting structure-only export...");
+                        try
+                        {
+                            report.RecordSelectionFormula = "1=0"; // Select no records
+                            var stream = report.ExportToStream(ExportFormatType.PortableDocFormat);
+                            result = ((MemoryStream)stream).ToArray();
+                            Console.WriteLine($"✅ Structure-only export successful: {result.Length} bytes");
+                        }
+                        catch (Exception structureEx)
+                        {
+                            Console.WriteLine($"❌ Structure export failed: {structureEx.Message}");
+                            throw new Exception($"All export methods failed. Direct: {exportEx.Message}, Disk: {diskEx.Message}, Structure: {structureEx.Message}");
+                        }
                     }
                 }
 
