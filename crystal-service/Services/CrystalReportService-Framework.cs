@@ -91,50 +91,36 @@ namespace CrystalReportsService.Services
             Console.WriteLine("  ⚠️ VerifyOnEveryPrint property not available in this SDK version");
             Console.WriteLine("  💡 Relying on cleared connection info to prevent verification");
 
-            // 6. Handle report parameters
+            // 6. Handle report parameters - CORRECT SDK APPROACH
             Console.WriteLine("6️⃣ Processing report parameters...");
             try
             {
-                if (rpt.ParameterFields.Count > 0)
+                // Use DataDefinition.ParameterFields to get parameter definitions with ValueType
+                if (rpt.DataDefinition.ParameterFields.Count > 0)
                 {
-                    Console.WriteLine($"  Found {rpt.ParameterFields.Count} parameters");
-                    foreach (ParameterField param in rpt.ParameterFields)
+                    Console.WriteLine($"  Found {rpt.DataDefinition.ParameterFields.Count} parameters in DataDefinition");
+                    foreach (ParameterFieldDefinition paramDef in rpt.DataDefinition.ParameterFields)
                     {
                         try
                         {
-                            Console.WriteLine($"    Processing parameter: {param.Name}");
+                            Console.WriteLine($"    Processing parameter: {paramDef.Name} (Type: {paramDef.ValueType})");
                             
-                            // Set default values - use generic approach since ValueType not available
-                            object defaultValue = "PREVIEW_VALUE";  // Default string value
+                            // Set appropriate default value based on parameter type
+                            object defaultValue = GetDefaultValueForParameterType(paramDef.ValueType);
                             
-                            // Try different approaches to set parameter values
-                            if (param.CurrentValues != null)
-                            {
-                                param.CurrentValues.Clear();
-                                param.CurrentValues.AddValue(defaultValue);
-                                Console.WriteLine($"      ✅ Set CurrentValues to: {defaultValue}");
-                            }
-                            
-                            // Try to set HasCurrentValue if available
-                            try
-                            {
-                                param.HasCurrentValue = true;
-                                Console.WriteLine($"      ✅ Set HasCurrentValue = true");
-                            }
-                            catch 
-                            {
-                                Console.WriteLine($"      ⚠️ HasCurrentValue property not available");
-                            }
+                            // Use the correct SDK method: SetParameterValue
+                            rpt.SetParameterValue(paramDef.Name, defaultValue);
+                            Console.WriteLine($"      ✅ Set parameter '{paramDef.Name}' = {defaultValue} (Type: {paramDef.ValueType})");
                         }
                         catch (Exception paramEx)
                         {
-                            Console.WriteLine($"      ⚠️ Could not set parameter {param.Name}: {paramEx.Message}");
+                            Console.WriteLine($"      ⚠️ Could not set parameter {paramDef.Name}: {paramEx.Message}");
                         }
                     }
                 }
                 else
                 {
-                    Console.WriteLine("  No parameters found");
+                    Console.WriteLine("  No parameters found in DataDefinition");
                 }
             }
             catch (Exception paramEx)
@@ -143,6 +129,37 @@ namespace CrystalReportsService.Services
             }
             
             Console.WriteLine("🎯 Force offline procedure completed!");
+        }
+
+        private object GetDefaultValueForParameterType(FieldValueType valueType)
+        {
+            switch (valueType)
+            {
+                case FieldValueType.StringField:
+                    return "PREVIEW_INVOICE_001";
+                case FieldValueType.NumberField:
+                    return 1001;
+                case FieldValueType.CurrencyField:
+                    return 100.00m;
+                case FieldValueType.BooleanField:
+                    return true;
+                case FieldValueType.DateField:
+                    return DateTime.Now.Date;
+                case FieldValueType.TimeField:
+                    return DateTime.Now.TimeOfDay;
+                case FieldValueType.DateTimeField:
+                    return DateTime.Now;
+                case FieldValueType.Int8sField:
+                case FieldValueType.Int8uField:
+                case FieldValueType.Int16sField:
+                case FieldValueType.Int16uField:
+                case FieldValueType.Int32sField:
+                case FieldValueType.Int32uField:
+                    return 1001;
+                default:
+                    Console.WriteLine($"      ⚠️ Unknown parameter type {valueType}, using string default");
+                    return "PREVIEW_VALUE";
+            }
         }
 
         public ReportMetadata ExtractMetadata(string reportPath)
