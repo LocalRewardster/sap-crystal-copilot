@@ -4,12 +4,126 @@ using System.Data;
 using System.IO;
 using CrystalDecisions.CrystalReports.Engine;
 using CrystalDecisions.Shared;
+using CrystalDecisions.ReportAppServer.ClientDoc;
+using CrystalDecisions.ReportAppServer.DatabaseController;
 using CrystalReportsService.Models;
 
 namespace CrystalReportsService.Services
 {
     public class CrystalReportServiceFramework
     {
+        private void ForceOffline(ReportDocument rpt, DataSet ds)
+        {
+            Console.WriteLine("🔧 Starting comprehensive force offline procedure...");
+            
+            // Helper method to wipe database connections
+            System.Action<Database> wipeDatabase = db =>
+            {
+                Console.WriteLine($"Processing database with {db.Tables.Count} tables...");
+                foreach (Table t in db.Tables)
+                {
+                    try
+                    {
+                        var alias = t.Name;
+                        Console.WriteLine($"  Processing table: {alias}");
+                        
+                        if (ds.Tables.Contains(alias))
+                        {
+                            t.SetDataSource(ds.Tables[alias]);
+                            Console.WriteLine($"    ✅ SetDataSource for {alias}");
+                        }
+                        
+                        // Triple-sure connection clearing
+                        t.LogOnInfo.ConnectionInfo.ServerName = "";
+                        t.LogOnInfo.ConnectionInfo.DatabaseName = "";
+                        t.LogOnInfo.ConnectionInfo.UserID = "";
+                        t.LogOnInfo.ConnectionInfo.Password = "";
+                        t.ApplyLogOnInfo(t.LogOnInfo);
+                        Console.WriteLine($"    ✅ Cleared connection info for {alias}");
+                    }
+                    catch (Exception tableEx)
+                    {
+                        Console.WriteLine($"    ⚠️ Could not process table {t.Name}: {tableEx.Message}");
+                    }
+                }
+            };
+
+            // 1. Main report tables
+            Console.WriteLine("1️⃣ Processing main report database...");
+            wipeDatabase(rpt.Database);
+
+            // 2. Sub-reports
+            Console.WriteLine("2️⃣ Processing sub-reports...");
+            foreach (ReportDocument sr in rpt.Subreports)
+            {
+                Console.WriteLine($"  Processing sub-report: {sr.Name}");
+                wipeDatabase(sr.Database);
+            }
+
+            // 3. Command tables via RAS API
+            Console.WriteLine("3️⃣ Processing command tables...");
+            try
+            {
+                var rc = rpt.ReportClientDocument;
+                foreach (var tab in rc.DatabaseController.Database.Tables)
+                {
+                    if (tab is ICommandTable cmd)
+                    {
+                        Console.WriteLine($"  Processing command table: {cmd.Name}");
+                        cmd.CommandText = "SELECT 1 AS Dummy";
+                        rc.DatabaseController.SetTableLocation(tab, cmd as ITable);
+                        Console.WriteLine($"    ✅ Updated command table {cmd.Name}");
+                    }
+                }
+            }
+            catch (Exception cmdEx)
+            {
+                Console.WriteLine($"⚠️ Command table processing failed: {cmdEx.Message}");
+            }
+
+            // 4. Table links/aliases
+            Console.WriteLine("4️⃣ Processing table links...");
+            try
+            {
+                foreach (TableLink link in rpt.Database.Links)
+                {
+                    Console.WriteLine($"  Processing link: {link.SourceTable.Name} -> {link.DestinationTable.Name}");
+                    
+                    if (ds.Tables.Contains(link.SourceTable.Name))
+                    {
+                        link.SourceTable.SetDataSource(ds.Tables[link.SourceTable.Name]);
+                    }
+                    if (ds.Tables.Contains(link.DestinationTable.Name))
+                    {
+                        link.DestinationTable.SetDataSource(ds.Tables[link.DestinationTable.Name]);
+                    }
+                    Console.WriteLine($"    ✅ Updated link tables");
+                }
+            }
+            catch (Exception linkEx)
+            {
+                Console.WriteLine($"⚠️ Table link processing failed: {linkEx.Message}");
+            }
+
+            // 5. Kill verification flags
+            Console.WriteLine("5️⃣ Disabling verification...");
+            try
+            {
+                rpt.VerifyOnEveryPrint = false;
+                Console.WriteLine("  ✅ Set VerifyOnEveryPrint = false");
+                
+                var rc = rpt.ReportClientDocument;
+                rc.VerifyDatabase(false);
+                Console.WriteLine("  ✅ Called VerifyDatabase(false)");
+            }
+            catch (Exception verifyEx)
+            {
+                Console.WriteLine($"⚠️ Verification disabling failed: {verifyEx.Message}");
+            }
+
+            Console.WriteLine("🎯 Force offline procedure completed!");
+        }
+
         public ReportMetadata ExtractMetadata(string reportPath)
         {
             try
@@ -164,38 +278,23 @@ namespace CrystalReportsService.Services
                     
                     Console.WriteLine($"🎯 DataSet created with {dataSet.Tables.Count} tables");
                     
-                    // Clear original database connections before injecting DataSet
-                    Console.WriteLine("🗑️ Clearing original database connections...");
+                    // COMPREHENSIVE FORCE OFFLINE - Handle all connection types
+                    Console.WriteLine("🎯 FORCE OFFLINE: Comprehensive database disconnection...");
                     try
                     {
-                        // Clear all existing data source connections
-                        report.DataSourceConnections.Clear();
-                        Console.WriteLine("✅ Cleared DataSourceConnections");
-                        
-                        // Also try to clear database tables
-                        foreach (Table table in report.Database.Tables)
-                        {
-                            try
-                            {
-                                table.LogOnInfo.ConnectionInfo.ServerName = "";
-                                table.LogOnInfo.ConnectionInfo.DatabaseName = "";
-                                table.LogOnInfo.ConnectionInfo.UserID = "";
-                                table.LogOnInfo.ConnectionInfo.Password = "";
-                                table.ApplyLogOnInfo(table.LogOnInfo);
-                            }
-                            catch { /* ignore individual table failures */ }
-                        }
-                        Console.WriteLine("✅ Cleared individual table connections");
+                        ForceOffline(report, dataSet);
+                        Console.WriteLine("✅ Force offline completed - all connection handles cleared");
                     }
-                    catch (Exception clearEx)
+                    catch (Exception forceEx)
                     {
-                        Console.WriteLine($"⚠️ Could not clear connections: {clearEx.Message}");
+                        Console.WriteLine($"❌ Force offline failed: {forceEx.Message}");
+                        Console.WriteLine($"Stack trace: {forceEx.StackTrace}");
+                        Console.WriteLine("Proceeding with basic DataSet injection...");
+                        
+                        // Fallback to basic injection
+                        report.SetDataSource(dataSet);
+                        Console.WriteLine("✅ Basic DataSet injection completed");
                     }
-                    
-                    // Inject the DataSet into Crystal Reports
-                    Console.WriteLine("💉 Injecting DataSet into Crystal Reports...");
-                    report.SetDataSource(dataSet);
-                    Console.WriteLine("✅ DataSet injection completed");
                     
                     // Note: DataSet injection should bypass server verification automatically
                     Console.WriteLine("💡 DataSet injection should bypass server verification");
