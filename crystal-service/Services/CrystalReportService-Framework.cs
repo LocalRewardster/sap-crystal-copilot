@@ -98,8 +98,8 @@ namespace CrystalReportsService.Services
                         {
                             Console.WriteLine($"Creating DataTable for: {table.Name}");
                             
-                            // Create DataTable with the exact name Crystal expects
-                            var dataTable = new DataTable(table.Location); // Use the table location as DataTable name
+                            // Create DataTable with unique name based on table name (not location)
+                            var dataTable = new DataTable(table.Name); // Use the table name to avoid duplicates
                             
                             // Add basic columns that most reports expect
                             // We'll add common field types - Crystal Reports will ignore unused ones
@@ -114,7 +114,19 @@ namespace CrystalReportsService.Services
                             dataTable.Columns.Add("Value", typeof(string));
                             dataTable.Columns.Add("Reference", typeof(string));
                             
-                            // Add one empty row to satisfy Crystal Reports
+                            // Add specific fields that formulas are looking for
+                            dataTable.Columns.Add("CashAccount", typeof(bool)); // For {Customer.CashAccount}
+                            dataTable.Columns.Add("Address", typeof(string));
+                            dataTable.Columns.Add("City", typeof(string));
+                            dataTable.Columns.Add("State", typeof(string));
+                            dataTable.Columns.Add("ZipCode", typeof(string));
+                            dataTable.Columns.Add("Phone", typeof(string));
+                            dataTable.Columns.Add("Email", typeof(string));
+                            dataTable.Columns.Add("ContactName", typeof(string));
+                            dataTable.Columns.Add("TaxID", typeof(string));
+                            dataTable.Columns.Add("CreditLimit", typeof(decimal));
+                            
+                            // Add one sample row to satisfy Crystal Reports
                             var row = dataTable.NewRow();
                             row["ID"] = 1;
                             row["Name"] = "Sample Data";
@@ -126,6 +138,19 @@ namespace CrystalReportsService.Services
                             row["Type"] = "Preview";
                             row["Value"] = "N/A";
                             row["Reference"] = "PREVIEW";
+                            
+                            // Set values for the specific fields formulas are looking for
+                            row["CashAccount"] = false; // Default to false for {Customer.CashAccount}
+                            row["Address"] = "123 Sample Street";
+                            row["City"] = "Sample City";
+                            row["State"] = "SC";
+                            row["ZipCode"] = "12345";
+                            row["Phone"] = "555-0123";
+                            row["Email"] = "sample@example.com";
+                            row["ContactName"] = "Sample Contact";
+                            row["TaxID"] = "12-3456789";
+                            row["CreditLimit"] = 10000.00m;
+                            
                             dataTable.Rows.Add(row);
                             
                             dataSet.Tables.Add(dataTable);
