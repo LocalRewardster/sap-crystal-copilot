@@ -144,19 +144,8 @@ namespace CrystalReportsService.Services
                     report.SetDataSource(dataSet);
                     Console.WriteLine("✅ DataSet injection completed");
                     
-                    // Disable server verification
-                    try
-                    {
-                        if (report.DataSourceConnections.Count > 0)
-                        {
-                            report.DataSourceConnections[0].VerifyServerOnLogin = false;
-                            Console.WriteLine("✅ Disabled VerifyServerOnLogin");
-                        }
-                    }
-                    catch (Exception verifyEx)
-                    {
-                        Console.WriteLine($"⚠️ Could not disable VerifyServerOnLogin: {verifyEx.Message}");
-                    }
+                    // Note: DataSet injection should bypass server verification automatically
+                    Console.WriteLine("💡 DataSet injection should bypass server verification");
                     
                     // Verify database against the DataSet (should work now)
                     try
