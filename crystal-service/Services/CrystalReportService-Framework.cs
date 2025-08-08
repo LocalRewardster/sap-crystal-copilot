@@ -88,18 +88,8 @@ namespace CrystalReportsService.Services
 
             // 5. Kill verification flags
             Console.WriteLine("5️⃣ Disabling verification...");
-            try
-            {
-                rpt.VerifyOnEveryPrint = false;
-                Console.WriteLine("  ✅ Set VerifyOnEveryPrint = false");
-                
-                // Note: ReportClientDocument.VerifyDatabase() not available in this SDK version
-                Console.WriteLine("  ⚠️ Advanced VerifyDatabase(false) not available - relying on VerifyOnEveryPrint = false");
-            }
-            catch (Exception verifyEx)
-            {
-                Console.WriteLine($"⚠️ Verification disabling failed: {verifyEx.Message}");
-            }
+            Console.WriteLine("  ⚠️ VerifyOnEveryPrint property not available in this SDK version");
+            Console.WriteLine("  💡 Relying on cleared connection info to prevent verification");
 
             Console.WriteLine("🎯 Force offline procedure completed!");
         }
