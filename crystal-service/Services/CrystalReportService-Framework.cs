@@ -248,6 +248,49 @@ namespace CrystalReportsService.Services
                 
                 try 
                 {
+                    // NUCLEAR OPTION: Disable ALL database connections FIRST
+                    Console.WriteLine("🔥 NUCLEAR OPTION: Disabling ALL database connections before DataSet injection...");
+                    try
+                    {
+                        foreach (Table table in report.Database.Tables)
+                        {
+                            if (table.LogOnInfo != null && table.LogOnInfo.ConnectionInfo != null)
+                            {
+                                // Completely wipe connection info
+                                table.LogOnInfo.ConnectionInfo.ServerName = "";
+                                table.LogOnInfo.ConnectionInfo.DatabaseName = "";
+                                table.LogOnInfo.ConnectionInfo.UserID = "";
+                                table.LogOnInfo.ConnectionInfo.Password = "";
+                                table.LogOnInfo.ConnectionInfo.Type = ConnectionInfoType.Unknown;
+                                table.ApplyLogOnInfo(table.LogOnInfo);
+                                Console.WriteLine($"    🔥 Nuked connection for: {table.Name}");
+                            }
+                        }
+                        
+                        // Also disable for subreports
+                        foreach (ReportDocument subreport in report.Subreports)
+                        {
+                            foreach (Table table in subreport.Database.Tables)
+                            {
+                                if (table.LogOnInfo != null && table.LogOnInfo.ConnectionInfo != null)
+                                {
+                                    table.LogOnInfo.ConnectionInfo.ServerName = "";
+                                    table.LogOnInfo.ConnectionInfo.DatabaseName = "";
+                                    table.LogOnInfo.ConnectionInfo.UserID = "";
+                                    table.LogOnInfo.ConnectionInfo.Password = "";
+                                    table.LogOnInfo.ConnectionInfo.Type = ConnectionInfoType.Unknown;
+                                    table.ApplyLogOnInfo(table.LogOnInfo);
+                                    Console.WriteLine($"    🔥 Nuked subreport connection for: {table.Name}");
+                                }
+                            }
+                        }
+                        Console.WriteLine("🔥 All database connections nuked!");
+                    }
+                    catch (Exception nukeEx)
+                    {
+                        Console.WriteLine($"⚠️ Nuclear connection disable failed: {nukeEx.Message}");
+                    }
+                
                     // Create a DataSet that matches the schema Crystal Reports expects
                     var dataSet = new DataSet();
                     
