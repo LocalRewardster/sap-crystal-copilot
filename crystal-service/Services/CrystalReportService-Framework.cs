@@ -102,16 +102,29 @@ namespace CrystalReportsService.Services
                     {
                         try
                         {
-                            Console.WriteLine($"    Processing parameter: {param.Name} (Type: {param.ValueType})");
+                            Console.WriteLine($"    Processing parameter: {param.Name}");
                             
-                            // Set default values based on parameter type
-                            var defaultValue = GetDefaultParameterValue(param.ValueType);
-                            param.DefaultValue = defaultValue;
-                            param.HasCurrentValue = true;
-                            param.CurrentValues.Clear();
-                            param.CurrentValues.AddValue(defaultValue);
+                            // Set default values - use generic approach since ValueType not available
+                            object defaultValue = "PREVIEW_VALUE";  // Default string value
                             
-                            Console.WriteLine($"      ✅ Set default value: {defaultValue}");
+                            // Try different approaches to set parameter values
+                            if (param.CurrentValues != null)
+                            {
+                                param.CurrentValues.Clear();
+                                param.CurrentValues.AddValue(defaultValue);
+                                Console.WriteLine($"      ✅ Set CurrentValues to: {defaultValue}");
+                            }
+                            
+                            // Try to set HasCurrentValue if available
+                            try
+                            {
+                                param.HasCurrentValue = true;
+                                Console.WriteLine($"      ✅ Set HasCurrentValue = true");
+                            }
+                            catch 
+                            {
+                                Console.WriteLine($"      ⚠️ HasCurrentValue property not available");
+                            }
                         }
                         catch (Exception paramEx)
                         {
@@ -130,29 +143,6 @@ namespace CrystalReportsService.Services
             }
             
             Console.WriteLine("🎯 Force offline procedure completed!");
-        }
-        
-        private object GetDefaultParameterValue(FieldValueType valueType)
-        {
-            switch (valueType)
-            {
-                case FieldValueType.StringField:
-                    return "PREVIEW";
-                case FieldValueType.NumberField:
-                    return 1;
-                case FieldValueType.CurrencyField:
-                    return 0.00m;
-                case FieldValueType.BooleanField:
-                    return false;
-                case FieldValueType.DateField:
-                    return DateTime.Now;
-                case FieldValueType.TimeField:
-                    return DateTime.Now;
-                case FieldValueType.DateTimeField:
-                    return DateTime.Now;
-                default:
-                    return "DEFAULT";
-            }
         }
 
         public ReportMetadata ExtractMetadata(string reportPath)
