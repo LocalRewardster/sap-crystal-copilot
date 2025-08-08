@@ -64,30 +64,9 @@ namespace CrystalReportsService.Services
 
                 var report = new ReportDocument();
                 
-                // CRITICAL: Set database options BEFORE loading the report
+                // CRITICAL: Configure report for offline mode before loading
                 Console.WriteLine("🔧 Configuring report for offline mode...");
-                try
-                {
-                    // Set the report to not verify on every use
-                    report.VerifyOnEveryUse = false;
-                    Console.WriteLine("Disabled VerifyOnEveryUse");
-                    
-                    // Try to set offline mode if available
-                    try
-                    {
-                        // This might help with database-heavy reports
-                        var summaryInfo = report.SummaryInfo;
-                        Console.WriteLine("Accessed SummaryInfo for offline mode");
-                    }
-                    catch (Exception summaryEx)
-                    {
-                        Console.WriteLine($"Could not access SummaryInfo: {summaryEx.Message}");
-                    }
-                }
-                catch (Exception verifyEx)
-                {
-                    Console.WriteLine($"Could not disable VerifyOnEveryUse: {verifyEx.Message}");
-                }
+                Console.WriteLine("Report document created, ready for loading...");
 
                 Console.WriteLine("📂 Loading report with database bypass...");
                 
@@ -95,10 +74,10 @@ namespace CrystalReportsService.Services
                 bool reportLoaded = false;
                 Exception lastLoadException = null;
                 
-                // Method 1: Load with database verification disabled
+                // Method 1: Standard report load
                 try
                 {
-                    Console.WriteLine("Attempting load with VerifyOnEveryUse = false...");
+                    Console.WriteLine("Attempting standard report load...");
                     report.Load(reportPath);
                     reportLoaded = true;
                     Console.WriteLine("✅ Report loaded successfully");
@@ -115,9 +94,7 @@ namespace CrystalReportsService.Services
                         report.Dispose();
                         report = new ReportDocument();
                         
-                        // Set all possible offline flags before loading
-                        report.VerifyOnEveryUse = false;
-                        
+                        Console.WriteLine("Fresh report document created");
                         report.Load(reportPath);
                         reportLoaded = true;
                         Console.WriteLine("✅ Fresh report load successful");
@@ -126,6 +103,33 @@ namespace CrystalReportsService.Services
                     {
                         Console.WriteLine($"❌ Fresh load also failed: {freshEx.Message}");
                         lastLoadException = freshEx;
+                        
+                        // Method 3: Try with immediate database logon clearing
+                        try
+                        {
+                            Console.WriteLine("🎯 Attempting load with immediate database bypass...");
+                            report.Dispose();
+                            report = new ReportDocument();
+                            
+                            // Load first, then immediately try to clear database
+                            report.Load(reportPath);
+                            
+                            // Immediately try to disable database after load
+                            try
+                            {
+                                report.SetDatabaseLogon("", "", "", "", false);
+                                Console.WriteLine("Applied immediate database logon clearing");
+                            }
+                            catch { /* ignore */ }
+                            
+                            reportLoaded = true;
+                            Console.WriteLine("✅ Load with immediate bypass successful");
+                        }
+                        catch (Exception bypassEx)
+                        {
+                            Console.WriteLine($"❌ Immediate bypass also failed: {bypassEx.Message}");
+                            lastLoadException = bypassEx;
+                        }
                     }
                 }
                 
