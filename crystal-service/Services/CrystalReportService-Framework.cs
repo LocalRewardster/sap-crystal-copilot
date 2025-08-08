@@ -164,6 +164,34 @@ namespace CrystalReportsService.Services
                     
                     Console.WriteLine($"🎯 DataSet created with {dataSet.Tables.Count} tables");
                     
+                    // Clear original database connections before injecting DataSet
+                    Console.WriteLine("🗑️ Clearing original database connections...");
+                    try
+                    {
+                        // Clear all existing data source connections
+                        report.DataSourceConnections.Clear();
+                        Console.WriteLine("✅ Cleared DataSourceConnections");
+                        
+                        // Also try to clear database tables
+                        foreach (Table table in report.Database.Tables)
+                        {
+                            try
+                            {
+                                table.LogOnInfo.ConnectionInfo.ServerName = "";
+                                table.LogOnInfo.ConnectionInfo.DatabaseName = "";
+                                table.LogOnInfo.ConnectionInfo.UserID = "";
+                                table.LogOnInfo.ConnectionInfo.Password = "";
+                                table.ApplyLogOnInfo(table.LogOnInfo);
+                            }
+                            catch { /* ignore individual table failures */ }
+                        }
+                        Console.WriteLine("✅ Cleared individual table connections");
+                    }
+                    catch (Exception clearEx)
+                    {
+                        Console.WriteLine($"⚠️ Could not clear connections: {clearEx.Message}");
+                    }
+                    
                     // Inject the DataSet into Crystal Reports
                     Console.WriteLine("💉 Injecting DataSet into Crystal Reports...");
                     report.SetDataSource(dataSet);
