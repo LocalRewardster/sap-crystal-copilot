@@ -249,6 +249,9 @@ namespace CrystalReportsService.Services
                         try
                         {
                             Console.WriteLine($"Creating DataTable for: {table.Name}");
+                            Console.WriteLine($"  Table Location: {table.Location}");
+                            Console.WriteLine($"  Table LogOnInfo.ServerName: {table.LogOnInfo?.ServerName ?? "null"}");
+                            Console.WriteLine($"  Table LogOnInfo.DatabaseName: {table.LogOnInfo?.DatabaseName ?? "null"}");
                             
                             // Create DataTable with unique name based on table name (not location)
                             var dataTable = new DataTable(table.Name); // Use the table name to avoid duplicates
@@ -267,6 +270,7 @@ namespace CrystalReportsService.Services
                             dataTable.Columns.Add("Reference", typeof(string));
                             
                             // Add specific fields that formulas are looking for
+                            // Based on the error: {Customer.CashAccount}
                             dataTable.Columns.Add("CashAccount", typeof(bool)); // For {Customer.CashAccount}
                             dataTable.Columns.Add("Address", typeof(string));
                             dataTable.Columns.Add("City", typeof(string));
@@ -277,6 +281,18 @@ namespace CrystalReportsService.Services
                             dataTable.Columns.Add("ContactName", typeof(string));
                             dataTable.Columns.Add("TaxID", typeof(string));
                             dataTable.Columns.Add("CreditLimit", typeof(decimal));
+                            
+                            // Add more fields that might be referenced in formulas
+                            dataTable.Columns.Add("CustomerID", typeof(int));
+                            dataTable.Columns.Add("CustomerName", typeof(string));
+                            dataTable.Columns.Add("CompanyName", typeof(string));
+                            dataTable.Columns.Add("AccountNumber", typeof(string));
+                            dataTable.Columns.Add("Balance", typeof(decimal));
+                            dataTable.Columns.Add("Terms", typeof(string));
+                            dataTable.Columns.Add("SalesRep", typeof(string));
+                            dataTable.Columns.Add("Territory", typeof(string));
+                            dataTable.Columns.Add("Active", typeof(bool));
+                            dataTable.Columns.Add("Created", typeof(DateTime));
                             
                             // Add one sample row to satisfy Crystal Reports
                             var row = dataTable.NewRow();
@@ -303,6 +319,18 @@ namespace CrystalReportsService.Services
                             row["TaxID"] = "12-3456789";
                             row["CreditLimit"] = 10000.00m;
                             
+                            // Set values for additional fields
+                            row["CustomerID"] = 1001;
+                            row["CustomerName"] = "Sample Customer";
+                            row["CompanyName"] = "Sample Company Inc.";
+                            row["AccountNumber"] = "ACCT-001";
+                            row["Balance"] = 0.00m;
+                            row["Terms"] = "NET30";
+                            row["SalesRep"] = "Sample Rep";
+                            row["Territory"] = "North";
+                            row["Active"] = true;
+                            row["Created"] = DateTime.Now;
+                            
                             dataTable.Rows.Add(row);
                             
                             dataSet.Tables.Add(dataTable);
@@ -315,6 +343,15 @@ namespace CrystalReportsService.Services
                     }
                     
                     Console.WriteLine($"🎯 DataSet created with {dataSet.Tables.Count} tables");
+                    
+                    // Debug: Show what's in our DataSet
+                    Console.WriteLine("🔍 DATASET DEBUG INFO:");
+                    foreach (DataTable dt in dataSet.Tables)
+                    {
+                        Console.WriteLine($"  Table: {dt.TableName} ({dt.Columns.Count} columns, {dt.Rows.Count} rows)");
+                        var columnNames = string.Join(", ", dt.Columns.Cast<DataColumn>().Select(c => c.ColumnName));
+                        Console.WriteLine($"    Columns: {columnNames}");
+                    }
                     
                     // COMPREHENSIVE FORCE OFFLINE - Handle all connection types
                     Console.WriteLine("🎯 FORCE OFFLINE: Comprehensive database disconnection...");
