@@ -41,25 +41,38 @@ namespace CrystalReportsService.Controllers
 
                 byte[] previewBytes;
                 
-                // TRY PUSH MODEL FIRST - completely database-free approach
+                // TRY TEMPLATE CLONE FIRST - most advanced database-free approach
                 try
                 {
-                    _logger.LogInformation("🔥 Attempting PUSH MODEL approach...");
-                    var pushModelService = new CrystalReportServicePushModel();
-                    previewBytes = await pushModelService.GeneratePreview(request.ReportPath, request.Format);
-                    _logger.LogInformation("✅ PUSH MODEL succeeded!");
+                    _logger.LogInformation("🔧 Attempting TEMPLATE CLONE approach...");
+                    var templateCloneService = new CrystalReportServiceTemplateClone();
+                    previewBytes = await templateCloneService.GeneratePreview(request.ReportPath, request.Format);
+                    _logger.LogInformation("✅ TEMPLATE CLONE succeeded!");
                 }
-                catch (Exception pushEx)
+                catch (Exception templateEx)
                 {
-                    _logger.LogWarning($"❌ PUSH MODEL failed: {pushEx.Message}");
-                    _logger.LogInformation("🔄 Falling back to original service...");
+                    _logger.LogWarning($"❌ TEMPLATE CLONE failed: {templateEx.Message}");
                     
-                    // Fallback to original service
-                    previewBytes = await _crystalService.GeneratePreviewAsync(
-                        request.ReportPath, 
-                        request.Format, 
-                        request.Parameters
-                    );
+                    // TRY PUSH MODEL SECOND
+                    try
+                    {
+                        _logger.LogInformation("🔥 Falling back to PUSH MODEL approach...");
+                        var pushModelService = new CrystalReportServicePushModel();
+                        previewBytes = await pushModelService.GeneratePreview(request.ReportPath, request.Format);
+                        _logger.LogInformation("✅ PUSH MODEL succeeded!");
+                    }
+                    catch (Exception pushEx)
+                    {
+                        _logger.LogWarning($"❌ PUSH MODEL failed: {pushEx.Message}");
+                        _logger.LogInformation("🔄 Falling back to original service...");
+                        
+                        // Fallback to original service
+                        previewBytes = await _crystalService.GeneratePreviewAsync(
+                            request.ReportPath, 
+                            request.Format, 
+                            request.Parameters
+                        );
+                    }
                 }
 
                 var contentType = GetContentType(request.Format);
