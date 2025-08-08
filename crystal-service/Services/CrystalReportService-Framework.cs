@@ -172,16 +172,8 @@ namespace CrystalReportsService.Services
                     // Note: DataSet injection should bypass server verification automatically
                     Console.WriteLine("💡 DataSet injection should bypass server verification");
                     
-                    // Verify database against the DataSet (should work now)
-                    try
-                    {
-                        report.VerifyDatabase();
-                        Console.WriteLine("✅ Database verification successful with DataSet");
-                    }
-                    catch (Exception verifyEx)
-                    {
-                        Console.WriteLine($"⚠️ Database verification failed: {verifyEx.Message}");
-                    }
+                    // Skip database verification - DataSet doesn't need it
+                    Console.WriteLine("⚡ Skipping database verification - DataSet is self-contained");
                 }
                 catch (Exception datasetEx)
                 {
