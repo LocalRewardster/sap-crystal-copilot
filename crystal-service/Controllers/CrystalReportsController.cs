@@ -38,11 +38,28 @@ namespace CrystalReportsService.Controllers
                     });
                 }
 
-                var previewBytes = await _crystalService.GeneratePreviewAsync(
-                    request.ReportPath, 
-                    request.Format, 
-                    request.Parameters
-                );
+                byte[] previewBytes;
+                
+                // TRY PUSH MODEL FIRST - completely database-free approach
+                try
+                {
+                    _logger.LogInformation("🔥 Attempting PUSH MODEL approach...");
+                    var pushModelService = new CrystalReportServicePushModel();
+                    previewBytes = await pushModelService.GeneratePreview(request.ReportPath, request.Format);
+                    _logger.LogInformation("✅ PUSH MODEL succeeded!");
+                }
+                catch (Exception pushEx)
+                {
+                    _logger.LogWarning($"❌ PUSH MODEL failed: {pushEx.Message}");
+                    _logger.LogInformation("🔄 Falling back to original service...");
+                    
+                    // Fallback to original service
+                    previewBytes = await _crystalService.GeneratePreviewAsync(
+                        request.ReportPath, 
+                        request.Format, 
+                        request.Parameters
+                    );
+                }
 
                 var contentType = GetContentType(request.Format);
                 var fileName = $"{Path.GetFileNameWithoutExtension(request.ReportPath)}.{request.Format.ToLower()}";
