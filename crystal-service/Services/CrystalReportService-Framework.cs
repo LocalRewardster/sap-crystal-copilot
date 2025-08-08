@@ -189,11 +189,7 @@ namespace CrystalReportsService.Services
                     catch (Exception copyEx)
                     {
                         Console.WriteLine($"❌ Data-free copy also failed: {copyEx.Message}");
-                        Console.WriteLine("🎯 Generating mock preview as fallback...");
-                        
-                        // Generate a mock PDF with information about the issue
-                        result = GenerateMockPreview(reportPath, $"Primary: {exportEx.Message}, Copy: {copyEx.Message}");
-                        Console.WriteLine($"✅ Mock preview generated: {result.Length} bytes");
+                        throw new Exception($"All export methods failed. Primary: {exportEx.Message}, Copy: {copyEx.Message}");
                     }
                 }
 
