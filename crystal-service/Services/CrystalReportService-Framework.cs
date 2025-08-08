@@ -250,8 +250,21 @@ namespace CrystalReportsService.Services
                         {
                             Console.WriteLine($"Creating DataTable for: {table.Name}");
                             Console.WriteLine($"  Table Location: {table.Location}");
-                            Console.WriteLine($"  Table LogOnInfo.ServerName: {table.LogOnInfo?.ServerName ?? "null"}");
-                            Console.WriteLine($"  Table LogOnInfo.DatabaseName: {table.LogOnInfo?.DatabaseName ?? "null"}");
+                            try
+                            {
+                                if (table.LogOnInfo != null)
+                                {
+                                    Console.WriteLine($"  Table has LogOnInfo (ConnectionInfo available)");
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"  Table LogOnInfo: null");
+                                }
+                            }
+                            catch
+                            {
+                                Console.WriteLine($"  Table LogOnInfo: not accessible");
+                            }
                             
                             // Create DataTable with unique name based on table name (not location)
                             var dataTable = new DataTable(table.Name); // Use the table name to avoid duplicates
@@ -349,8 +362,14 @@ namespace CrystalReportsService.Services
                     foreach (DataTable dt in dataSet.Tables)
                     {
                         Console.WriteLine($"  Table: {dt.TableName} ({dt.Columns.Count} columns, {dt.Rows.Count} rows)");
-                        var columnNames = string.Join(", ", dt.Columns.Cast<DataColumn>().Select(c => c.ColumnName));
-                        Console.WriteLine($"    Columns: {columnNames}");
+                        
+                        // Build column names list without LINQ
+                        var columnNames = new List<string>();
+                        foreach (DataColumn column in dt.Columns)
+                        {
+                            columnNames.Add(column.ColumnName);
+                        }
+                        Console.WriteLine($"    Columns: {string.Join(", ", columnNames)}");
                     }
                     
                     // COMPREHENSIVE FORCE OFFLINE - Handle all connection types
